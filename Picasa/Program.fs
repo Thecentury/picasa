@@ -2,6 +2,7 @@ namespace Picasa
 
 open System
 open System.IO
+open AppKit
 open Avalonia
 open Avalonia.Controls
 open Avalonia.Input
@@ -14,7 +15,9 @@ open Avalonia.FuncUI.Elmish
 open Avalonia.Controls.ApplicationLifetimes
 
 open Core
+//open MonoMac.AppKit
 open NLog
+open Picasa.OSX
 
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
@@ -77,13 +80,19 @@ type MainWindow(args : string[]) as this =
 
 type App() =
     inherit Application()
+    let logger = LogManager.GetCurrentClassLogger()
 
     override this.Initialize() =
+        this.UrlsOpened.Add (fun e -> logger.Info $"Urls opened: %A{e.Urls}")
         this.Styles.Add (FluentTheme(baseUri = null, Mode = FluentThemeMode.Light))
 
     override this.OnFrameworkInitializationCompleted() =
+        this.UrlsOpened.Add (fun e -> logger.Info $"Urls opened: %A{e.Urls}")
         match this.ApplicationLifetime with
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
+            NSApplication.Init()
+            NSApplication.SharedApplication.Delegate <- new AppDelegate2()
+
             let mainWindow = MainWindow(desktopLifetime.Args)
             desktopLifetime.MainWindow <- mainWindow
         | _ -> ()
@@ -94,17 +103,26 @@ module Program =
     let main(args: string[]) =
         let logger = LogManager.GetCurrentClassLogger()
         try
+            AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
             logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
+            
+            AppDelegate2.InitializeToolkit()
+
             let locator = AvaloniaLocator.Current :?> AvaloniaLocator
             let opts = AvaloniaNativePlatformOptions(UseGpu = false)
             locator.BindToSelf(opts) |> ignore
 
-            AppBuilder
-                .Configure<App>()
-                .UsePlatformDetect()
-                .UseSkia()
-                .StartWithClassicDesktopLifetime(args)
+            let exitCode =
+                AppBuilder
+                    .Configure<App>()
+                    .UsePlatformDetect()
+                    .UseSkia()
+                    .StartWithClassicDesktopLifetime(args)
+                
+            logger.Info "Done"
+            
+            exitCode
         with
         | e ->
-            logger.Error(e, "Vsyo upalo")
+            logger.Error(e, "Unhandled exception")
             -1
