@@ -3,10 +3,10 @@
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
-        <RuntimeIdentifier>osx-x64</RuntimeIdentifier>
-        <PublishReadyToRun>true</PublishReadyToRun>
+<!--        <PublishSingleFile>true</PublishSingleFile>-->
+<!--        <SelfContained>true</SelfContained>-->
+<!--        <RuntimeIdentifier>osx-x64</RuntimeIdentifier>-->
+<!--        <PublishReadyToRun>true</PublishReadyToRun>-->
     </PropertyGroup>
 
     <ItemGroup>

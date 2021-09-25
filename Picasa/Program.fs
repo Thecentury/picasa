@@ -14,7 +14,7 @@ open Avalonia.FuncUI.Elmish
 open Avalonia.Controls.ApplicationLifetimes
 
 open Core
-open Picasa.UI
+open NLog
 
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
@@ -36,7 +36,8 @@ type MainWindow(args : string[]) as this =
             | _ -> if Environment.OSVersion.Platform = PlatformID.MacOSX || Environment.OSVersion.Platform = PlatformID.Unix then
                         "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
                     else
-                        "C:\Downloads\E75ORggVkAITgXM.jpg"
+//                        "C:\Downloads\E75ORggVkAITgXM.jpg"
+                        "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
 
         let otherImages = loadOtherImages imagePath
         let model : UI.Model = {
@@ -58,16 +59,16 @@ type MainWindow(args : string[]) as this =
         Elmish.Program.mkSimple (fun () -> model) wrappedUpdate UI.view
         |> Program.withHost this
         |> Program.withSubscription (fun _model ->
-            let sub (dispatch : Dispatch<Msg>) =
+            let sub (dispatch : Dispatch<UI.Msg>) =
                 let keyDownCallback (e : KeyEventArgs) =
                     match e.Key, e.KeyModifiers with
-                    | Key.Left, KeyModifiers.None -> dispatch Msg.MoveLeft
-                    | Key.Right, KeyModifiers.None -> dispatch Msg.MoveRight
+                    | Key.Left, KeyModifiers.None -> dispatch UI.Msg.MoveLeft
+                    | Key.Right, KeyModifiers.None -> dispatch UI.Msg.MoveRight
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
                 let layoutUpdatedHandler _ =
-                    dispatch (Msg.WindowSizeChanged this.ClientSize)
+                    dispatch (UI.Msg.WindowSizeChanged this.ClientSize)
                 this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
@@ -91,12 +92,19 @@ module Program =
 
     [<EntryPoint>]
     let main(args: string[]) =
-        let locator = AvaloniaLocator.Current :?> AvaloniaLocator
-        let opts = AvaloniaNativePlatformOptions(UseGpu = false)
-        locator.BindToSelf(opts) |> ignore
+        let logger = LogManager.GetCurrentClassLogger()
+        try
+            logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
+            let locator = AvaloniaLocator.Current :?> AvaloniaLocator
+            let opts = AvaloniaNativePlatformOptions(UseGpu = false)
+            locator.BindToSelf(opts) |> ignore
 
-        AppBuilder
-            .Configure<App>()
-            .UsePlatformDetect()
-            .UseSkia()
-            .StartWithClassicDesktopLifetime(args)
+            AppBuilder
+                .Configure<App>()
+                .UsePlatformDetect()
+                .UseSkia()
+                .StartWithClassicDesktopLifetime(args)
+        with
+        | e ->
+            logger.Error(e, "Vsyo upalo")
+            -1
