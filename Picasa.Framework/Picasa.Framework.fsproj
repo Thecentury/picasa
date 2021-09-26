@@ -6,13 +6,17 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <ProjectTypeGuids>{42C0BBD9-55CE-4FC1-8D90-A7348ABAFB23};{F2A71F9B-5D33-465A-A702-920D77279786}</ProjectTypeGuids>
         <ProjectGuid>{8B487E6F-CF65-4B5B-9943-A3A218D4BBC7}</ProjectGuid>
+        <UseStandardResourceNames>true</UseStandardResourceNames>
         <OutputType>Exe</OutputType>
         <RootNamespace>Picasa.Framework</RootNamespace>
         <AssemblyName>Picasa.Framework</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+<!--        <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>-->
+<!--        <TargetFrameworkIdentifier>Xamarin.Mac</TargetFrameworkIdentifier>-->
         <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <DocumentationFile>bin\$(Configuration)\$(AssemblyName).xml</DocumentationFile>
+        <MonoMacResourcePrefix>Resources</MonoMacResourcePrefix>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
@@ -168,6 +172,8 @@
           <Private>True</Private>
         </Reference>
         <Reference Include="System" />
+        <Reference Include="System.Xml" />
+        <Reference Include="System.Xml.Linq" />
         <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51">
           <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
           <Private>True</Private>
@@ -223,6 +229,9 @@
           <Private>True</Private>
         </Reference>
         <Reference Include="WindowsBase" />
+        <Reference Include="Xamarin.Mac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065">
+          <HintPath>..\ext\Xamarin.Mac.dll</HintPath>
+        </Reference>
     </ItemGroup>
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
