@@ -2,7 +2,6 @@ namespace Picasa
 
 open System
 open System.IO
-open AppKit
 open Avalonia
 open Avalonia.Controls
 open Avalonia.Input
@@ -15,9 +14,7 @@ open Avalonia.FuncUI.Elmish
 open Avalonia.Controls.ApplicationLifetimes
 
 open Core
-//open MonoMac.AppKit
 open NLog
-open Picasa.OSX
 
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
@@ -90,9 +87,6 @@ type App() =
         this.UrlsOpened.Add (fun e -> logger.Info $"Urls opened: %A{e.Urls}")
         match this.ApplicationLifetime with
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
-            NSApplication.Init()
-            NSApplication.SharedApplication.Delegate <- new AppDelegate2()
-
             let mainWindow = MainWindow(desktopLifetime.Args)
             desktopLifetime.MainWindow <- mainWindow
         | _ -> ()
@@ -106,8 +100,6 @@ module Program =
             AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
             logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
             
-            AppDelegate2.InitializeToolkit()
-
             let locator = AvaloniaLocator.Current :?> AvaloniaLocator
             let opts = AvaloniaNativePlatformOptions(UseGpu = false)
             locator.BindToSelf(opts) |> ignore

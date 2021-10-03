@@ -30,7 +30,6 @@
     <PackageReference Include="JaggerJo.Avalonia.FuncUI.Elmish" Version="0.5.0-beta" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="5.0.2" />
     <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0" />
-    <PackageReference Include="MonoMac.NetStandard" Version="0.0.4" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="NLog.Config" Version="4.7.11" />
@@ -39,15 +38,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Picasa.OSX\Picasa.OSX.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="OpenTK, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065">
-      <HintPath>..\ext\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="Xamarin.Mac, Version=0.0.0.0, Culture=neutral, PublicKeyToken=84e04ff9cfb79065">
-      <HintPath>..\ext\Xamarin.Mac.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
