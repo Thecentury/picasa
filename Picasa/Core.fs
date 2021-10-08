@@ -2,6 +2,7 @@ module Picasa.Core
 
 open System
 open System.IO
+open Prelude
 
 let private filters = [
     "*.jpg"
@@ -12,11 +13,11 @@ let private filters = [
 ]
 
 type SurroundingFiles = {
-    Left : List<string>
-    Right : List<string>
+    Left : List<Path>
+    Right : List<Path>
 }
 
-let loadOtherImages (current : string) =
+let loadOtherImages (Path current) = 
     let dir = Path.GetDirectoryName current
     let initialState = {
         Left = []
@@ -27,13 +28,13 @@ let loadOtherImages (current : string) =
         let comparison = String.Compare (file, current)
         match comparison with
         | c when c < 0 ->
-            { Left = file :: state.Left
+            { Left = (Path file) :: state.Left
               Right = state.Right }
         | c when c = 0 -> state
         | _ ->
             { Left = state.Left
-              Right = file :: state.Right }
-
+              Right = (Path file) :: state.Right }
+            
     let otherImages =
         filters
         |> Seq.collect (fun f -> Directory.EnumerateFiles (dir, f, EnumerationOptions(MatchCasing = MatchCasing.CaseInsensitive)))
@@ -45,4 +46,3 @@ let loadOtherImages (current : string) =
         |> Seq.fold folder initialState
 
     { otherImages with Right = List.rev otherImages.Right }
-

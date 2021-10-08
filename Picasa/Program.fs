@@ -1,7 +1,7 @@
 namespace Picasa
 
 open System
-open System.IO
+open Prelude
 open Avalonia
 open Avalonia.Controls
 open Avalonia.Input
@@ -15,6 +15,7 @@ open Avalonia.Controls.ApplicationLifetimes
 
 open Core
 open NLog
+open Picasa.Model
 
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
@@ -39,37 +40,33 @@ type MainWindow(args : string[]) as this =
 //                        "C:\Downloads\E75ORggVkAITgXM.jpg"
                         "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
 
-        let otherImages = loadOtherImages imagePath
-        let model : UI.Model = {
-            LeftImages = otherImages.Left
-            RightImages = otherImages.Right
-            Image = imagePath
-            WindowSize = this.ClientSize
-        }
+//        let otherImages = loadOtherImages imagePath
+        let model = Model.initialWithCommands (Path imagePath)
 
         let wrappedUpdate msg model =
-            let model' = UI.update msg model
-            if model.Image <> model'.Image then
-                let fileName = Path.GetFileName model'.Image
-                this.Title <- $"Picasa - {fileName}"
-            model'
+            let model', cmd = update msg model
+            // todo idea display index of the current file in the dir
+//            if model.CurrentImagePath <> model'.CurrentImagePath then
+//                let fileName = Path.GetFileName model'.CurrentImagePath
+//                this.Title <- $"Picasa - {fileName}"
+            (model', cmd)
 
         //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
         //this.VisualRoot.VisualRoot.Renderer.DrawDirtyRects <- true
-        Elmish.Program.mkSimple (fun () -> model) wrappedUpdate UI.view
+        Elmish.Program.mkProgram (fun () -> model) wrappedUpdate UI2.view
         |> Program.withHost this
         |> Program.withSubscription (fun _model ->
-            let sub (dispatch : Dispatch<UI.Msg>) =
+            let sub (dispatch : Dispatch<Msg>) =
                 let keyDownCallback (e : KeyEventArgs) =
                     match e.Key, e.KeyModifiers with
-                    | Key.Left, KeyModifiers.None -> dispatch UI.Msg.MoveLeft
-                    | Key.Right, KeyModifiers.None -> dispatch UI.Msg.MoveRight
+                    | Key.Left, KeyModifiers.None -> dispatch Msg.NavigateLeft
+                    | Key.Right, KeyModifiers.None -> dispatch Msg.NavigateRight
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
-                let layoutUpdatedHandler _ =
-                    dispatch (UI.Msg.WindowSizeChanged this.ClientSize)
-                this.LayoutUpdated.Add layoutUpdatedHandler
+//                let layoutUpdatedHandler _ =
+//                    dispatch (Msg.WindowSizeChanged this.ClientSize)
+//                this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
         |> Program.withConsoleTrace
