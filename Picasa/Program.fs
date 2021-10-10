@@ -56,7 +56,7 @@ type MainWindow(args : string[]) as this =
 
         //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
         //this.VisualRoot.VisualRoot.Renderer.DrawDirtyRects <- true
-        Elmish.Program.mkProgram (fun () -> model) wrappedUpdate UI2.view
+        Elmish.Program.mkProgram (fun () -> model) wrappedUpdate UI.view
         |> Program.withHost this
         |> Program.withSubscription (fun _model ->
             let sub (dispatch : Dispatch<Msg>) =

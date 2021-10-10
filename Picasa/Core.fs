@@ -38,7 +38,7 @@ let loadOtherImages (Path current) =
     let otherImages =
         filters
         |> Seq.collect (fun f -> Directory.EnumerateFiles (dir, f, EnumerationOptions(MatchCasing = MatchCasing.CaseInsensitive)))
-        |> Seq.sort
+        |> Seq.sortBy (fun s -> s.ToLowerInvariant())
         |> Seq.toList
 
     let otherImages =

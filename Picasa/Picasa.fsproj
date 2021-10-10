@@ -15,7 +15,6 @@
     <Compile Include="Core.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="UI.fs" />
-    <Compile Include="UI2.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -37,10 +36,6 @@
     <PackageReference Include="NLog" Version="4.7.11" />
     <PackageReference Include="NLog.Config" Version="4.7.11" />
     <PackageReference Update="FSharp.Core" Version="6.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Picasa.OSX\Picasa.OSX.csproj" />
   </ItemGroup>
 
 </Project>
