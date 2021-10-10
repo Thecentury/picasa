@@ -14,7 +14,8 @@ type Model = {
     CurrentImage : DeferredResult<IBitmap>
     CachedImages : Map<Path, Result<IBitmap, string>>
     WindowSize : Option<Size>
-}
+} with
+    override this.ToString () = $"Model '%s{this.CurrentImagePath.Value}'"
 
 type Msg =
     | StartLoadingImage of Path

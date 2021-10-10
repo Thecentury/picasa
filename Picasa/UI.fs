@@ -13,8 +13,23 @@ let image (model : Model) (img : IBitmap) =
         Image.create [
             Image.horizontalAlignment HorizontalAlignment.Center
             Image.verticalAlignment VerticalAlignment.Center
+            Image.maxWidth ^ float img.PixelSize.Width
+            Image.maxHeight ^ float img.PixelSize.Height
             Image.source img
         ] |> generalize
+//        Grid.create [
+//            Grid.horizontalAlignment HorizontalAlignment.Center
+//            Grid.verticalAlignment VerticalAlignment.Center
+//            Grid.children [
+//                Image.create [
+//                    Image.horizontalAlignment HorizontalAlignment.Center
+//                    Image.verticalAlignment VerticalAlignment.Center
+//                    Image.width ^ float img.PixelSize.Width
+//                    Image.height ^ float img.PixelSize.Height
+//                    Image.source img
+//                ]
+//            ]
+//        ] |> generalize
     | _ ->
         Image.create [
             Image.horizontalAlignment HorizontalAlignment.Stretch
@@ -30,5 +45,6 @@ let view (model : Model) _dispatch =
         | _ -> []
 
     Grid.create [
+        Grid.margin 20.
         Grid.children image
     ]

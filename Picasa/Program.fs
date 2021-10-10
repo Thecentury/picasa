@@ -23,29 +23,32 @@ type MainWindow(args : string[]) as this =
     do
         base.Title <- "Picasa"
         base.WindowState <- WindowState.Maximized
-        base.Background <- Brushes.Black
-
+        base.Background <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
+        base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
+        base.TransparencyBackgroundFallback <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
+        
         let keyListener (e : KeyEventArgs) =
             match e.Key with
             | Key.Escape -> this.Close ()
             | _ -> ()
         this.KeyDown.Add keyListener
-//        base.SystemDecorations <- SystemDecorations.None
+        base.SystemDecorations <- SystemDecorations.None
 
         let imagePath =
             match args with
             | [| path |] -> path
             | _ -> if Environment.OSVersion.Platform = PlatformID.MacOSX || Environment.OSVersion.Platform = PlatformID.Unix then
-                        "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
+                        "/Users/mic/Downloads/avatar.jpeg"
                     else
 //                        "C:\Downloads\E75ORggVkAITgXM.jpg"
-                        "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
+                        "/Users/mic/Downloads/avatar.jpeg"
 
         let model = Model.initialWithCommands (Path imagePath)
         
         let sizeWasSet = ref false
 
         let wrappedUpdate msg model =
+            printfn $"Msg %A{msg}"
             let model', cmd = update msg model
             // todo idea display index of the current file in the dir
             if model.CurrentImagePath <> model'.CurrentImagePath || not sizeWasSet.Value then
@@ -72,7 +75,7 @@ type MainWindow(args : string[]) as this =
                 this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
-        |> Program.withConsoleTrace
+//        |> Program.withConsoleTrace
         |> Program.run
 
 type App() =
