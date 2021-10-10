@@ -24,4 +24,5 @@ let runAsynchronously f arg = async {
         return Error e.Message
 }
 
-type Path = Path of string
+type Path = Path of string with
+    member this.Value = let (Path path) = this in path

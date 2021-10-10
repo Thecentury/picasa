@@ -1,5 +1,6 @@
 module Picasa.Model
 
+open Avalonia
 open Avalonia.Media.Imaging
 open Elmish
 
@@ -12,6 +13,7 @@ type Model = {
     CurrentImagePath : Path
     CurrentImage : DeferredResult<IBitmap>
     CachedImages : Map<Path, Result<IBitmap, string>>
+    WindowSize : Option<Size>
 }
 
 type Msg =
@@ -21,6 +23,7 @@ type Msg =
     | ImageLoaded of Path * Result<IBitmap, string>
     | NavigateLeft
     | NavigateRight
+    | WindowSizeChanged of Size
 
 module Model =
     
@@ -31,6 +34,7 @@ module Model =
             CurrentImagePath = path
             CurrentImage = HasNotStartedYet
             CachedImages = Map.empty
+            WindowSize = None
         }
         
     let initialWithCommands path =
@@ -80,18 +84,31 @@ let update (msg : Msg) (model : Model) =
     | NavigateLeft ->
         match model.LeftImages, model.RightImages with
         | Resolved (Ok (l :: ls)), Resolved (Ok rs) ->
-            { model with
-                LeftImages = Resolved ^ Ok ls
-                CurrentImagePath = l
-                RightImages = Resolved ^ Ok (model.CurrentImagePath :: rs) }, Cmd.ofMsg ^ StartLoadingImage l
+            let preloadNextImage = ls |> List.tryHead |> Option.map (StartLoadingImage >> Cmd.ofMsg) |> Option.toList
+            let cmds = [Cmd.ofMsg ^ StartLoadingImage l] @ preloadNextImage
+            let model =
+                { model with
+                    LeftImages = Resolved ^ Ok ls
+                    CurrentImagePath = l
+                    RightImages = Resolved ^ Ok (model.CurrentImagePath :: rs) }
+            model, Cmd.batch cmds
         | _ -> model, Cmd.none
     | NavigateRight ->
         match model.LeftImages, model.RightImages with
         | Resolved (Ok ls), Resolved (Ok (r :: rs)) ->
-            { model with
-                LeftImages = Resolved ^ Ok (model.CurrentImagePath :: ls)
-                CurrentImagePath = r
-                RightImages = Resolved ^ Ok rs }, Cmd.ofMsg ^ StartLoadingImage r
+            let preloadNextImage = rs |> List.tryHead |> Option.map (StartLoadingImage >> Cmd.ofMsg) |> Option.toList
+            let cmds = [Cmd.ofMsg ^ StartLoadingImage r] @ preloadNextImage
+            let model =
+                { model with
+                    LeftImages = Resolved ^ Ok (model.CurrentImagePath :: ls)
+                    CurrentImagePath = r
+                    RightImages = Resolved ^ Ok rs }
+            model, Cmd.batch cmds
         | _ -> model, Cmd.none
+    | WindowSizeChanged newSize ->
+        if newSize.IsDefault then
+            model, Cmd.none
+        else
+            { model with WindowSize = Some newSize }, Cmd.none
 
             

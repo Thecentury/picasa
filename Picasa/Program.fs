@@ -1,6 +1,7 @@
 namespace Picasa
 
 open System
+open System.IO
 open Prelude
 open Avalonia
 open Avalonia.Controls
@@ -40,15 +41,17 @@ type MainWindow(args : string[]) as this =
 //                        "C:\Downloads\E75ORggVkAITgXM.jpg"
                         "/Users/mic/Downloads/1587287569-c6f97fdef6db0bcbe1184a419b5eb2ac.jpeg"
 
-//        let otherImages = loadOtherImages imagePath
         let model = Model.initialWithCommands (Path imagePath)
+        
+        let sizeWasSet = ref false
 
         let wrappedUpdate msg model =
             let model', cmd = update msg model
             // todo idea display index of the current file in the dir
-//            if model.CurrentImagePath <> model'.CurrentImagePath then
-//                let fileName = Path.GetFileName model'.CurrentImagePath
-//                this.Title <- $"Picasa - {fileName}"
+            if model.CurrentImagePath <> model'.CurrentImagePath || not sizeWasSet.Value then
+                sizeWasSet := true
+                let fileName = Path.GetFileName model'.CurrentImagePath.Value
+                this.Title <- $"Picasa - {fileName}"
             (model', cmd)
 
         //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
@@ -64,9 +67,9 @@ type MainWindow(args : string[]) as this =
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
-//                let layoutUpdatedHandler _ =
-//                    dispatch (Msg.WindowSizeChanged this.ClientSize)
-//                this.LayoutUpdated.Add layoutUpdatedHandler
+                let layoutUpdatedHandler _ =
+                    dispatch (Msg.WindowSizeChanged this.ClientSize)
+                this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
         |> Program.withConsoleTrace
