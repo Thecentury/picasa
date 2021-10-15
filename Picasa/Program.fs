@@ -26,6 +26,7 @@ type MainWindow(args : string[]) as this =
         base.Background <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
         base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
         base.TransparencyBackgroundFallback <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
+        base.SizeToContent <- SizeToContent.Manual
         NativeMenu.SetMenu(this, NativeMenu())
         
         let keyListener (e : KeyEventArgs) =
@@ -39,10 +40,12 @@ type MainWindow(args : string[]) as this =
             match args with
             | [| path |] -> path
             | _ -> if Environment.OSVersion.Platform = PlatformID.MacOSX || Environment.OSVersion.Platform = PlatformID.Unix then
-                        "/Users/mic/Downloads/avatar.jpeg"
+//                        "/Users/mic/Downloads/avatar.jpeg"
+                        "/Users/mic/Downloads/image1.jpeg"
                     else
 //                        "C:\Downloads\E75ORggVkAITgXM.jpg"
-                        "/Users/mic/Downloads/avatar.jpeg"
+//                        "/Users/mic/Downloads/avatar.jpeg"
+                        "/Users/mic/Downloads/image1.jpeg"
 
         let model = Model.initialWithCommands (Path imagePath)
         
@@ -70,6 +73,8 @@ type MainWindow(args : string[]) as this =
                     | Key.Left, KeyModifiers.Control -> dispatch Msg.NavigateToTheBeginning
                     | Key.Right, KeyModifiers.None -> dispatch Msg.NavigateRight
                     | Key.Right, KeyModifiers.Control -> dispatch Msg.NavigateToTheEnd
+                    | Key.OemOpenBrackets, KeyModifiers.None -> dispatch Msg.RotateLeft
+                    | Key.OemCloseBrackets, KeyModifiers.None -> dispatch Msg.RotateRight
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 

@@ -14,6 +14,7 @@ type Model = {
     CurrentImage : DeferredResult<IBitmap>
     CachedImages : Map<Path, Result<IBitmap, string>>
     WindowSize : Option<Size>
+    RotationAngle : int
 } with
     override this.ToString () = $"Model '%s{this.CurrentImagePath.Value}'"
 
@@ -26,6 +27,8 @@ type Msg =
     | NavigateRight
     | NavigateToTheBeginning
     | NavigateToTheEnd
+    | RotateLeft
+    | RotateRight
     | WindowSizeChanged of Size
 
 module Model =
@@ -38,6 +41,7 @@ module Model =
             CurrentImage = HasNotStartedYet
             CachedImages = Map.empty
             WindowSize = None
+            RotationAngle = 0
         }
         
     let initialWithCommands path =
@@ -151,5 +155,7 @@ let update (msg : Msg) (model : Model) =
             model, Cmd.none
         else
             { model with WindowSize = Some newSize }, Cmd.none
+    | RotateLeft -> { model with RotationAngle = model.RotationAngle + 1 }, Cmd.none
+    | RotateRight -> { model with RotationAngle = model.RotationAngle - 1 }, Cmd.none
 
             
