@@ -24,6 +24,8 @@ type Msg =
     | ImageLoaded of Path * Result<IBitmap, string>
     | NavigateLeft
     | NavigateRight
+    | NavigateToTheBeginning
+    | NavigateToTheEnd
     | WindowSizeChanged of Size
 
 module Model =
@@ -55,9 +57,13 @@ let update (msg : Msg) (model : Model) =
     | NeighboarsLoaded neighboars ->
         match neighboars with
         | Ok n ->
+            let preload =
+                [n.Left |> List.tryHead; n.Right |> List.tryHead]
+                |> List.map Option.toList |> List.collect id
+                |> List.map (StartLoadingImage >> Cmd.ofMsg)
             { model with
                 LeftImages = Resolved ^ Ok n.Left
-                RightImages = Resolved ^ Ok n.Right }, Cmd.none
+                RightImages = Resolved ^ Ok n.Right }, Cmd.batch preload
         | Error e ->
             { model with
                 LeftImages = Resolved ^ Error e
@@ -91,8 +97,25 @@ let update (msg : Msg) (model : Model) =
                 { model with
                     LeftImages = Resolved ^ Ok ls
                     CurrentImagePath = l
+                    CurrentImage = Deferred.InProgress
                     RightImages = Resolved ^ Ok (model.CurrentImagePath :: rs) }
             model, Cmd.batch cmds
+        | _ -> model, Cmd.none
+    | NavigateToTheBeginning ->
+        match model.LeftImages, model.RightImages with
+        | Resolved (Ok ls), Resolved (Ok rs) ->
+            let first = ls |> List.tryLast
+            match first with
+            | Some first ->
+                let other = ls |> List.take (ls.Length - 1) |> List.rev
+                // todo preload 2nd img
+                { model with
+                    LeftImages = Resolved ^ Ok []
+                    CurrentImagePath = first
+                    CurrentImage = InProgress
+                    RightImages = Resolved ^ Ok (other @ model.CurrentImagePath :: rs) }, Cmd.ofMsg ^ StartLoadingImage first
+            | None ->
+                model, Cmd.none
         | _ -> model, Cmd.none
     | NavigateRight ->
         match model.LeftImages, model.RightImages with
@@ -103,8 +126,25 @@ let update (msg : Msg) (model : Model) =
                 { model with
                     LeftImages = Resolved ^ Ok (model.CurrentImagePath :: ls)
                     CurrentImagePath = r
+                    CurrentImage = InProgress
                     RightImages = Resolved ^ Ok rs }
             model, Cmd.batch cmds
+        | _ -> model, Cmd.none
+    | NavigateToTheEnd ->
+        match model.LeftImages, model.RightImages with
+        | Resolved (Ok ls), Resolved (Ok rs) ->
+            let last = rs |> List.tryLast
+            match last with
+            | Some last ->
+                // todo preload img before last
+                let other = rs |> List.take (rs.Length - 1) |> List.rev
+                { model with
+                    LeftImages = Resolved ^ Ok (other @ (model.CurrentImagePath :: ls))
+                    CurrentImagePath = last
+                    CurrentImage = InProgress
+                    RightImages = Resolved ^ Ok [] }, Cmd.ofMsg ^ StartLoadingImage last
+            | None ->
+                model, Cmd.none
         | _ -> model, Cmd.none
     | WindowSizeChanged newSize ->
         if newSize.IsDefault then

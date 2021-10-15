@@ -67,7 +67,9 @@ type MainWindow(args : string[]) as this =
                 let keyDownCallback (e : KeyEventArgs) =
                     match e.Key, e.KeyModifiers with
                     | Key.Left, KeyModifiers.None -> dispatch Msg.NavigateLeft
+                    | Key.Left, KeyModifiers.Control -> dispatch Msg.NavigateToTheBeginning
                     | Key.Right, KeyModifiers.None -> dispatch Msg.NavigateRight
+                    | Key.Right, KeyModifiers.Control -> dispatch Msg.NavigateToTheEnd
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
