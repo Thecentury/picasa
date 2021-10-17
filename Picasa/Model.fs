@@ -13,7 +13,10 @@ type Rotation =
     | Right180
     | Right270
     
+type RotationDirection = Left | Right
+    
 module Rotation =
+    
     let rotateRight = function
         | NoRotation -> Right90
         | Right90 -> Right180
@@ -25,6 +28,11 @@ module Rotation =
         | Right90 -> NoRotation
         | Right180 -> Right90
         | Right270 -> Right180
+        
+    let rotate rotation dir =
+        match dir with
+        | Left -> rotateLeft rotation
+        | Right -> rotateRight rotation
         
     let toAngle = function
         | NoRotation -> 0
@@ -73,6 +81,16 @@ let rotateBitmap (bmp : IBitmap) rotation =
         dc.Dispose ()
         
         r :> IBitmap
+        
+let rotateImage (img : RotatedImage) direction =
+    let nextRotation = Rotation.rotate img.Rotation direction
+
+    match img.Rotation with
+    | NoRotation -> ()
+    | _ -> img.RotatedImage.Dispose ()
+
+    let rotated = rotateBitmap img.OriginalImage nextRotation
+    { img with RotatedImage = rotated; Rotation = nextRotation }
 
 type Model = {
     LeftImages : DeferredResult<List<Path>>
@@ -93,8 +111,7 @@ type Msg =
     | NavigateRight
     | NavigateToTheBeginning
     | NavigateToTheEnd
-    | RotateLeft
-    | RotateRight
+    | Rotate of RotationDirection
     | WindowSizeChanged of Size
 
 module Model =
@@ -217,23 +234,9 @@ let update (msg : Msg) (model : Model) =
             model, Cmd.none
         else
             { model with WindowSize = Some newSize }, Cmd.none
-    | RotateLeft ->
+    | Rotate dir ->
         match model.CurrentImage with
         | Resolved (Ok img) ->
-            let rot = Rotation.rotateLeft img.Rotation
-            // todo dispose prev rotated image
-            let rotated = rotateBitmap img.OriginalImage rot
-            let img = { img with Rotation = rot; RotatedImage = rotated }
-            { model with CurrentImage = Resolved ^ Ok img }, Cmd.none
-        | _ -> model, Cmd.none
-    | RotateRight ->
-        match model.CurrentImage with
-        | Resolved (Ok img) ->
-            let rot = Rotation.rotateRight img.Rotation
-            // todo dispose prev rotated image
-            let rotated = rotateBitmap img.OriginalImage rot
-            let img = { img with Rotation = rot; RotatedImage = rotated }
-            { model with CurrentImage = Resolved ^ Ok img }, Cmd.none
-        | _ -> model, Cmd.none
-
-            
+            let rotated = rotateImage img dir
+            { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
+        | _ -> model, Cmd.none            

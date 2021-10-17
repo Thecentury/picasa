@@ -11,21 +11,13 @@ let view (model : Model) _dispatch =
     let image =
         match model.CurrentImage with
         | Resolved (Ok img) ->
-            let image = Image.create [
+            Image.create [
                 Image.horizontalAlignment HorizontalAlignment.Stretch
                 Image.verticalAlignment VerticalAlignment.Stretch
                 Image.maxWidth ^ float img.RotatedImage.PixelSize.Width
                 Image.maxHeight ^ float img.RotatedImage.PixelSize.Height
                 Image.source img.RotatedImage
-            ]
-//            Border.create [
-//                Border.borderThickness 2.
-//                Border.borderBrush Brushes.BlueViolet
-////                Border.horizontalAlignment HorizontalAlignment.Stretch
-////                Border.verticalAlignment VerticalAlignment.Stretch
-//                Border.child image
-//            ] |> generalize
-            image |> generalize
+            ] |> generalize
         | Resolved (Error e) ->
             TextBlock.create [
                 TextBlock.horizontalAlignment HorizontalAlignment.Center

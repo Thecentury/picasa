@@ -16,6 +16,7 @@ open Avalonia.Controls.ApplicationLifetimes
 
 open Core
 open NLog
+open Picasa
 open Picasa.Model
 
 type MainWindow(args : string[]) as this =
@@ -75,8 +76,8 @@ type MainWindow(args : string[]) as this =
                     | Key.Left, KeyModifiers.Control -> dispatch Msg.NavigateToTheBeginning
                     | Key.Right, KeyModifiers.None -> dispatch Msg.NavigateRight
                     | Key.Right, KeyModifiers.Control -> dispatch Msg.NavigateToTheEnd
-                    | Key.OemOpenBrackets, KeyModifiers.None -> dispatch Msg.RotateLeft
-                    | Key.OemCloseBrackets, KeyModifiers.None -> dispatch Msg.RotateRight
+                    | Key.OemOpenBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Left
+                    | Key.OemCloseBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Right
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
@@ -93,11 +94,9 @@ type App() =
     let logger = LogManager.GetCurrentClassLogger()
 
     override this.Initialize() =
-        this.UrlsOpened.Add (fun e -> logger.Info $"Urls opened: %A{e.Urls}")
         this.Styles.Add (FluentTheme(baseUri = null, Mode = FluentThemeMode.Light))
 
     override this.OnFrameworkInitializationCompleted() =
-        this.UrlsOpened.Add (fun e -> logger.Info $"Urls opened: %A{e.Urls}")
         match this.ApplicationLifetime with
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
             let mainWindow = MainWindow(desktopLifetime.Args)
