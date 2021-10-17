@@ -27,9 +27,15 @@ let rotateBitmap (bmp : IBitmap) rotation =
         let r = new RenderTargetBitmap (rotatedSize)
         use dc = r.CreateDrawingContext null
         let correction =
-            if other = Right180 then Matrix.Identity else 
-            let diff = float ^ abs (bmp.PixelSize.Width - bmp.PixelSize.Height)
-            Matrix.CreateTranslation (-diff * 0.5, diff * 0.5)
+            if other = Right180 then
+                Matrix.Identity
+            else 
+                let diff = float ^ abs (bmp.PixelSize.Width - bmp.PixelSize.Height)
+                if bmp.PixelSize.Width < bmp.PixelSize.Height then
+                    Matrix.CreateTranslation (diff * 0.5, -diff * 0.5)
+                else
+                    Matrix.CreateTranslation (-diff * 0.5, diff * 0.5)
+
         dc.Transform <-
             Matrix.CreateTranslation (float bmp.PixelSize.Width * -0.5, float bmp.PixelSize.Height * -0.5) *
             Matrix.CreateRotation (Matrix.ToRadians angle) *
@@ -37,6 +43,7 @@ let rotateBitmap (bmp : IBitmap) rotation =
             correction
         let rect = Rect(bmp.PixelSize.ToSize(1.))
         dc.DrawBitmap (bmp.PlatformImpl, 1.0, rect, rect)
+        
         dc.Dispose ()
         
         r :> IBitmap
