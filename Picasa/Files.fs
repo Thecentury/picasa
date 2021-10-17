@@ -9,7 +9,7 @@ let private filters = [
     "*.jpeg"
     "*.bmp"
     "*.png"
-    "*.tiff"
+    "*.webp"
 ]
 
 type SurroundingFiles = {

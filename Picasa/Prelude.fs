@@ -2,6 +2,7 @@
 module Picasa.Prelude
 
 open Avalonia.Media.Imaging
+open NLog
 
 let (^) f x = f x
 
@@ -11,6 +12,10 @@ type Deferred<'t> =
     | Resolved of 't
     
 type DeferredResult<'t> = Deferred<Result<'t, string>>
+
+let (|ResolvedOk|_|) = function
+    | Resolved (Ok v) -> Some v
+    | _ -> None
 
 type AsyncOperationStatus<'t> =
     | Started
@@ -22,19 +27,23 @@ let runAsynchronously f arg = async {
         return Ok ^ f arg
     with
     | e ->
-        // todo log exception
+        let logger = LogManager.GetCurrentClassLogger ()
+        logger.Error (e, $"Failed to execute runAsynchronously(%A{f}, %A{arg})")
         return Error e.Message
 }
 
+[<Struct>]
 type Path = Path of string with
     member this.Value = let (Path path) = this in path
     
+[<Struct>]
 type Rotation =
     | NoRotation
     | Right90
     | Right180
     | Right270
     
+[<Struct>]
 type RotationDirection = Left | Right
     
 module Rotation =
