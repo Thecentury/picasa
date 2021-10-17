@@ -5,6 +5,7 @@ open Elmish
 
 open Picasa
 
+open Caching
 open Files
 open Images
     
@@ -12,7 +13,7 @@ type Model = {
     OtherImages : DeferredResult<SurroundingFiles>
     CurrentImagePath : Path
     CurrentImage : DeferredResult<RotatedImage>
-    CachedImages : Map<Path, Result<RotatedImage, string>>
+    CachedImages : Cache<Path, Result<RotatedImage, string>>
     WindowSize : Option<Size>
 }
 
@@ -35,7 +36,7 @@ module Model =
             OtherImages = HasNotStartedYet
             CurrentImagePath = path
             CurrentImage = HasNotStartedYet
-            CachedImages = Map.empty
+            CachedImages = Cache(notMoreThanDeletionPolicy 10)
             WindowSize = None
         }
         
@@ -76,8 +77,8 @@ let update (msg : Msg) (model : Model) =
                 Resolved img
             else
                 model.CurrentImage
-        let cache = Map.add path img model.CachedImages
-        { model with CurrentImage = currentImage; CachedImages = cache }, Cmd.none
+        model.CachedImages.Add path img
+        { model with CurrentImage = currentImage }, Cmd.none
     | NavigateLeft ->
         match model.OtherImages with
         | ResolvedOk { Left = l :: ls; Right = rs } ->

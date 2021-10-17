@@ -14,7 +14,6 @@ open Avalonia.FuncUI
 open Avalonia.FuncUI.Elmish
 open Avalonia.Controls.ApplicationLifetimes
 
-open Files
 open NLog
 open Picasa
 open Picasa.Model
@@ -37,7 +36,7 @@ type MainWindow(args : string[]) as this =
             | Key.Escape -> this.Close ()
             | _ -> ()
         this.KeyDown.Add keyListener
-        base.SystemDecorations <- SystemDecorations.None
+//        base.SystemDecorations <- SystemDecorations.None
 
         let imagePath =
             match args with
