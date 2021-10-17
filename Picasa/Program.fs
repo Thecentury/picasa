@@ -91,7 +91,6 @@ type MainWindow(args : string[]) as this =
 
 type App() =
     inherit Application()
-    let logger = LogManager.GetCurrentClassLogger()
 
     override this.Initialize() =
         this.Styles.Add (FluentTheme(baseUri = null, Mode = FluentThemeMode.Light))

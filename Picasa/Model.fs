@@ -191,12 +191,18 @@ let update (msg : Msg) (model : Model) =
             match first with
             | Some first ->
                 let other = ls |> List.take (ls.Length - 1) |> List.rev
-                // todo preload 2nd img
+                let commands = [
+                    Cmd.ofMsg ^ StartLoadingImage first
+                    match List.tryHead other with
+                    | None -> ()
+                    | Some next -> Cmd.ofMsg ^ StartLoadingImage next
+                ]
                 { model with
                     LeftImages = Resolved ^ Ok []
                     CurrentImagePath = first
                     CurrentImage = InProgress
-                    RightImages = Resolved ^ Ok (other @ model.CurrentImagePath :: rs) }, Cmd.ofMsg ^ StartLoadingImage first
+                    RightImages = Resolved ^ Ok (other @ model.CurrentImagePath :: rs) },
+                Cmd.batch commands
             | None ->
                 model, Cmd.none
         | _ -> model, Cmd.none
@@ -219,13 +225,18 @@ let update (msg : Msg) (model : Model) =
             let last = rs |> List.tryLast
             match last with
             | Some last ->
-                // todo preload img before last
                 let other = rs |> List.take (rs.Length - 1) |> List.rev
+                let commands = [
+                    Cmd.ofMsg ^ StartLoadingImage last
+                    match List.tryHead other with
+                    | None -> ()
+                    | Some next -> Cmd.ofMsg ^ StartLoadingImage next
+                ]
                 { model with
                     LeftImages = Resolved ^ Ok (other @ (model.CurrentImagePath :: ls))
                     CurrentImagePath = last
                     CurrentImage = InProgress
-                    RightImages = Resolved ^ Ok [] }, Cmd.ofMsg ^ StartLoadingImage last
+                    RightImages = Resolved ^ Ok [] }, Cmd.batch commands
             | None ->
                 model, Cmd.none
         | _ -> model, Cmd.none
