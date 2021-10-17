@@ -1,6 +1,7 @@
 namespace Picasa
 
 open System
+open System.Diagnostics
 open System.IO
 open Prelude
 open Avalonia
@@ -21,13 +22,15 @@ open Picasa.Model
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
     do
+        let backgroundBrush = SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy)) 
         base.Title <- "Picasa"
         base.WindowState <- WindowState.Maximized
-        base.Background <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
+        base.ShowInTaskbar <- false
+        base.Background <- backgroundBrush
         base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
-        base.TransparencyBackgroundFallback <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
+        base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
-        base.AttachDevTools ()
+//        base.AttachDevTools ()
         
         NativeMenu.SetMenu(this, NativeMenu())
         
@@ -40,31 +43,30 @@ type MainWindow(args : string[]) as this =
 
         let imagePath =
             match args with
+            | [| path; _ |]
             | [| path |] -> path
-            | _ -> if Environment.OSVersion.Platform = PlatformID.MacOSX || Environment.OSVersion.Platform = PlatformID.Unix then
-//                        "/Users/mic/Downloads/avatar.jpeg"
-                        "/Users/mic/Downloads/image1.jpeg"
-                    else
-//                        "C:\Downloads\E75ORggVkAITgXM.jpg"
-//                        "/Users/mic/Downloads/avatar.jpeg"
-                        "/Users/mic/Downloads/image1.jpeg"
+            | _ ->
+                let logger = LogManager.GetCurrentClassLogger ()
+                logger.Warn "Path was not provided, exiting"
+                this.Close ()
+                failwith "Path was not provided"
 
         let model = Model.initialWithCommands (Path imagePath)
         
-        let sizeWasSet = ref false
+        let titleWasSet = ref false
 
         let wrappedUpdate msg model =
             printfn $"Msg %A{msg}"
             let model', cmd = update msg model
-            // todo idea display index of the current file in the dir
-            if model.CurrentImagePath <> model'.CurrentImagePath || not sizeWasSet.Value then
-                sizeWasSet := true
+            if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
+                titleWasSet := true
                 let fileName = Path.GetFileName model'.CurrentImagePath.Value
                 this.Title <- $"Picasa - {fileName}"
             (model', cmd)
 
         //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
         //this.VisualRoot.VisualRoot.Renderer.DrawDirtyRects <- true
+        
         Elmish.Program.mkProgram (fun () -> model) wrappedUpdate UI.view
         |> Program.withHost this
         |> Program.withSubscription (fun _model ->
@@ -85,7 +87,14 @@ type MainWindow(args : string[]) as this =
                 this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
-//        |> Program.withConsoleTrace
+        |> Program.withSubscription (fun _ ->
+            let sub dispatch =
+                let async = async {
+                    do! Async.Sleep 2000
+                    dispatch Msg.WindowSizeBecameStable
+                }
+                async |> Async.Start
+            Cmd.ofSub sub) 
         |> Program.run
 
 type App() =
@@ -100,30 +109,51 @@ type App() =
             let mainWindow = MainWindow(desktopLifetime.Args)
             desktopLifetime.MainWindow <- mainWindow
         | _ -> ()
+        
 
 module Program =
+    
+    let logger = LogManager.GetCurrentClassLogger()
+
+    let closeParent () =
+        try
+            let args = Environment.GetCommandLineArgs()
+            if args.Length >= 3 then
+                let parsed, id = Int32.TryParse args.[2]
+                if parsed then
+                    use parent = Process.GetProcessById(id)
+                    parent.Kill ()
+                    logger.Info $"Killed parent by PID '{id}'"
+                else
+                    logger.Info $"Failed to parse parent PID '{args.[2]}' as int"
+        with
+        | e ->
+            logger.Error(e, "Failed to kill parent process")
 
     [<EntryPoint>]
     let main(args: string[]) =
-        let logger = LogManager.GetCurrentClassLogger()
         try
-            AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
-            logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
-            
-            let locator = AvaloniaLocator.Current :?> AvaloniaLocator
-            let opts = AvaloniaNativePlatformOptions(UseGpu = false)
-            locator.BindToSelf(opts) |> ignore
-
-            let exitCode =
-                AppBuilder
-                    .Configure<App>()
-                    .UsePlatformDetect()
-                    .UseSkia()
-                    .StartWithClassicDesktopLifetime(args)
+            try
+                AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
+                AppDomain.CurrentDomain.ProcessExit.Add (fun _ -> closeParent ())
+                logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
                 
-            logger.Info "Done"
-            
-            exitCode
+                let locator = AvaloniaLocator.Current :?> AvaloniaLocator
+                let opts = AvaloniaNativePlatformOptions(UseGpu = false)
+                locator.BindToSelf(opts) |> ignore
+
+                let exitCode =
+                    AppBuilder
+                        .Configure<App>()
+                        .UsePlatformDetect()
+                        .UseSkia()
+                        .StartWithClassicDesktopLifetime(args)
+                    
+                logger.Info "Done"
+                
+                exitCode
+            finally
+                closeParent ()
         with
         | e ->
             logger.Error(e, "Unhandled exception")

@@ -1,6 +1,5 @@
 module Picasa.UI
 
-open System
 open Avalonia.FuncUI
 open Avalonia.FuncUI.DSL
 open Avalonia.Controls
@@ -48,7 +47,7 @@ let view (model : Model) _dispatch =
             match model.CurrentImage with
             | Resolved (Ok img) -> $"{fileName} - {img.OriginalImage.PixelSize.Width} × {img.OriginalImage.PixelSize.Height}"
             | _ -> fileName
-        let fullCaption = position + fullCaption + $" | {Environment.WorkingSet / 1024L / 1024L} Mb"
+        let fullCaption = position + fullCaption
         
         TextBlock.create [
             TextBlock.text fullCaption
