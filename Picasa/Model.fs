@@ -1,97 +1,13 @@
 module Picasa.Model
 
 open Avalonia
-open Avalonia.Media.Imaging
 open Elmish
 
-open Picasa.Core
-open Prelude
+open Picasa
 
-type Rotation =
-    | NoRotation
-    | Right90
-    | Right180
-    | Right270
+open Files
+open Images
     
-type RotationDirection = Left | Right
-    
-module Rotation =
-    
-    let rotateRight = function
-        | NoRotation -> Right90
-        | Right90 -> Right180
-        | Right180 -> Right270
-        | Right270 -> NoRotation
-
-    let rotateLeft = function
-        | NoRotation -> Right270
-        | Right90 -> NoRotation
-        | Right180 -> Right90
-        | Right270 -> Right180
-        
-    let rotate rotation dir =
-        match dir with
-        | Left -> rotateLeft rotation
-        | Right -> rotateRight rotation
-        
-    let toAngle = function
-        | NoRotation -> 0
-        | Right90 -> 90
-        | Right180 -> 180
-        | Right270 -> 270
-
-type RotatedImage = {
-    OriginalImage : IBitmap
-    RotatedImage : IBitmap
-    Rotation : Rotation
-}
-
-let loadImage (Path path) =
-    let bmp = new Bitmap (path) :> IBitmap
-    {
-        OriginalImage = bmp
-        RotatedImage = bmp
-        Rotation = NoRotation
-    }
-    
-let rotatePixelSize (s : PixelSize) = function
-    | NoRotation
-    | Right180 -> s
-    | _ -> PixelSize(s.Height, s.Width)
-
-let rotateBitmap (bmp : IBitmap) rotation =
-    match rotation with
-    | NoRotation -> bmp
-    | other ->
-        let angle = Rotation.toAngle other |> float
-        let rotatedSize = rotatePixelSize bmp.PixelSize other
-        let r = new RenderTargetBitmap (rotatedSize)
-        use dc = r.CreateDrawingContext null
-        let correction =
-            if other = Right180 then Matrix.Identity else 
-            let diff = float ^ abs (bmp.PixelSize.Width - bmp.PixelSize.Height)
-            Matrix.CreateTranslation (-diff * 0.5, diff * 0.5)
-        dc.Transform <-
-            Matrix.CreateTranslation (float bmp.PixelSize.Width * -0.5, float bmp.PixelSize.Height * -0.5) *
-            Matrix.CreateRotation (Matrix.ToRadians angle) *
-            Matrix.CreateTranslation (float bmp.PixelSize.Width * 0.5, float bmp.PixelSize.Height * 0.5) *
-            correction
-        let rect = Rect(bmp.PixelSize.ToSize(1.))
-        dc.DrawBitmap (bmp.PlatformImpl, 1.0, rect, rect)
-        dc.Dispose ()
-        
-        r :> IBitmap
-        
-let rotateImage (img : RotatedImage) direction =
-    let nextRotation = Rotation.rotate img.Rotation direction
-
-    match img.Rotation with
-    | NoRotation -> ()
-    | _ -> img.RotatedImage.Dispose ()
-
-    let rotated = rotateBitmap img.OriginalImage nextRotation
-    { img with RotatedImage = rotated; Rotation = nextRotation }
-
 type Model = {
     LeftImages : DeferredResult<List<Path>>
     RightImages : DeferredResult<List<Path>>
@@ -99,8 +15,7 @@ type Model = {
     CurrentImage : DeferredResult<RotatedImage>
     CachedImages : Map<Path, Result<RotatedImage, string>>
     WindowSize : Option<Size>
-} with
-    override this.ToString () = $"Model '%s{this.CurrentImagePath.Value}'"
+}
 
 type Msg =
     | StartLoadingImage of Path
@@ -243,8 +158,11 @@ let update (msg : Msg) (model : Model) =
     | WindowSizeChanged newSize ->
         if newSize.IsDefault then
             model, Cmd.none
+        else if Some newSize = model.WindowSize then
+            model, Cmd.none
         else
-            { model with WindowSize = Some newSize }, Cmd.none
+            let model' = { model with WindowSize = Some newSize }
+            model', Cmd.none
     | Rotate dir ->
         match model.CurrentImage with
         | Resolved (Ok img) ->

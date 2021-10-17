@@ -12,7 +12,8 @@
 
   <ItemGroup>
     <Compile Include="Prelude.fs" />
-    <Compile Include="Core.fs" />
+    <Compile Include="Files.fs" />
+    <Compile Include="Images.fs" />
     <Compile Include="Model.fs" />
     <Compile Include="UI.fs" />
     <Compile Include="Program.fs" />

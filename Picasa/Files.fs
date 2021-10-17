@@ -1,4 +1,4 @@
-module Picasa.Core
+module Picasa.Files
 
 open System
 open System.IO

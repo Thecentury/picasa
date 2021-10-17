@@ -14,7 +14,7 @@ open Avalonia.FuncUI
 open Avalonia.FuncUI.Elmish
 open Avalonia.Controls.ApplicationLifetimes
 
-open Core
+open Files
 open NLog
 open Picasa
 open Picasa.Model
