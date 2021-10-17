@@ -15,7 +15,6 @@ type Model = {
     CurrentImage : DeferredResult<RotatedImage>
     CachedImages : Cache<Path, Result<RotatedImage, string>>
     WindowSize : Option<Size>
-    WindowSizeIsStable : bool
 }
 
 type Msg =
@@ -29,7 +28,6 @@ type Msg =
     | NavigateToTheEnd
     | Rotate of RotationDirection
     | WindowSizeChanged of Size
-    | WindowSizeBecameStable
 
 module Model =
     
@@ -40,7 +38,6 @@ module Model =
             CurrentImage = HasNotStartedYet
             CachedImages = Cache(notMoreThanDeletionPolicy 10)
             WindowSize = None
-            WindowSizeIsStable = false
         }
         
     let initialWithCommands path =
@@ -72,8 +69,7 @@ let update (msg : Msg) (model : Model) =
                     InProgress
                 else
                     model.CurrentImage
-            let loadSize = if model.WindowSizeIsStable then model.WindowSize else None
-            let cmd = Cmd.OfAsync.perform (runAsynchronously (loadImage loadSize)) path (fun img -> ImageLoaded (path, img))
+            let cmd = Cmd.OfAsync.perform (runAsynchronously loadImage) path (fun img -> ImageLoaded (path, img))
             { model with CurrentImage = currentImage }, cmd
     | ImageLoaded (path, img) ->
         let currentImage =
@@ -160,8 +156,6 @@ let update (msg : Msg) (model : Model) =
         else
             let model' = { model with WindowSize = Some newSize }
             model', Cmd.none
-    | WindowSizeBecameStable ->
-        { model with WindowSizeIsStable = true }, Cmd.none
     | Rotate dir ->
         match model.CurrentImage with
         | Resolved (Ok img) ->

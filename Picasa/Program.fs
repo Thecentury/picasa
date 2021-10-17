@@ -87,14 +87,6 @@ type MainWindow(args : string[]) as this =
                 this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
-        |> Program.withSubscription (fun _ ->
-            let sub dispatch =
-                let async = async {
-                    do! Async.Sleep 2000
-                    dispatch Msg.WindowSizeBecameStable
-                }
-                async |> Async.Start
-            Cmd.ofSub sub) 
         |> Program.run
 
 type App() =

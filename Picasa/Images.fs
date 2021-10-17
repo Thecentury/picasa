@@ -1,18 +1,12 @@
 module Picasa.Images
 
-open System.IO
 open Avalonia
 open Avalonia.Media.Imaging
 
 open Prelude
 
-let loadImage (size : Option<Size>) (Path path) =
-    let bmp =
-        match size with
-        | Some size when size.Height > 0. ->
-            use fs = new FileStream(path, FileMode.Open, FileAccess.Read)
-            Bitmap.DecodeToHeight(fs, int ^ ceil size.Height) :> IBitmap
-        | _ -> new Bitmap (path) :> IBitmap
+let loadImage (Path path) =
+    let bmp = new Bitmap (path) :> IBitmap
     {
         OriginalImage = bmp
         RotatedImage = bmp
