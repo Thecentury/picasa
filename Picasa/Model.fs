@@ -7,14 +7,80 @@ open Elmish
 open Picasa.Core
 open Prelude
 
+type Rotation =
+    | NoRotation
+    | Right90
+    | Right180
+    | Right270
+    
+module Rotation =
+    let rotateRight = function
+        | NoRotation -> Right90
+        | Right90 -> Right180
+        | Right180 -> Right270
+        | Right270 -> NoRotation
+
+    let rotateLeft = function
+        | NoRotation -> Right270
+        | Right90 -> NoRotation
+        | Right180 -> Right90
+        | Right270 -> Right180
+        
+    let toAngle = function
+        | NoRotation -> 0
+        | Right90 -> 90
+        | Right180 -> 180
+        | Right270 -> 270
+
+type RotatedImage = {
+    OriginalImage : IBitmap
+    RotatedImage : IBitmap
+    Rotation : Rotation
+}
+
+let loadImage (Path path) =
+    let bmp = new Bitmap (path) :> IBitmap
+    {
+        OriginalImage = bmp
+        RotatedImage = bmp
+        Rotation = NoRotation
+    }
+    
+let rotatePixelSize (s : PixelSize) = function
+    | NoRotation
+    | Right180 -> s
+    | _ -> PixelSize(s.Height, s.Width)
+
+let rotateBitmap (bmp : IBitmap) rotation =
+    match rotation with
+    | NoRotation -> bmp
+    | other ->
+        let angle = Rotation.toAngle other |> float
+        let rotatedSize = rotatePixelSize bmp.PixelSize other
+        let r = new RenderTargetBitmap (rotatedSize)
+        use dc = r.CreateDrawingContext null
+        let correction =
+            if other = Right180 then Matrix.Identity else 
+            let diff = float ^ abs (bmp.PixelSize.Width - bmp.PixelSize.Height)
+            Matrix.CreateTranslation (-diff * 0.5, diff * 0.5)
+        dc.Transform <-
+            Matrix.CreateTranslation (float bmp.PixelSize.Width * -0.5, float bmp.PixelSize.Height * -0.5) *
+            Matrix.CreateRotation (Matrix.ToRadians angle) *
+            Matrix.CreateTranslation (float bmp.PixelSize.Width * 0.5, float bmp.PixelSize.Height * 0.5) *
+            correction
+        let rect = Rect(bmp.PixelSize.ToSize(1.))
+        dc.DrawBitmap (bmp.PlatformImpl, 1.0, rect, rect)
+        dc.Dispose ()
+        
+        r :> IBitmap
+
 type Model = {
     LeftImages : DeferredResult<List<Path>>
     RightImages : DeferredResult<List<Path>>
     CurrentImagePath : Path
-    CurrentImage : DeferredResult<IBitmap>
-    CachedImages : Map<Path, Result<IBitmap, string>>
+    CurrentImage : DeferredResult<RotatedImage>
+    CachedImages : Map<Path, Result<RotatedImage, string>>
     WindowSize : Option<Size>
-    RotationAngle : int
 } with
     override this.ToString () = $"Model '%s{this.CurrentImagePath.Value}'"
 
@@ -22,7 +88,7 @@ type Msg =
     | StartLoadingImage of Path
     | StartReadingNeighboars
     | NeighboarsLoaded of Result<SurroundingFiles, string>
-    | ImageLoaded of Path * Result<IBitmap, string>
+    | ImageLoaded of Path * Result<RotatedImage, string>
     | NavigateLeft
     | NavigateRight
     | NavigateToTheBeginning
@@ -41,16 +107,12 @@ module Model =
             CurrentImage = HasNotStartedYet
             CachedImages = Map.empty
             WindowSize = None
-            RotationAngle = 0
         }
         
     let initialWithCommands path =
         let model = initial path
         (model, Cmd.batch [Cmd.ofMsg ^ StartLoadingImage path; Cmd.ofMsg StartReadingNeighboars])
-        
-let loadImage (Path path) =
-    new Bitmap (path) :> IBitmap
-    
+            
 let update (msg : Msg) (model : Model) =
     match msg with
     | StartReadingNeighboars ->
@@ -155,7 +217,23 @@ let update (msg : Msg) (model : Model) =
             model, Cmd.none
         else
             { model with WindowSize = Some newSize }, Cmd.none
-    | RotateLeft -> { model with RotationAngle = model.RotationAngle + 1 }, Cmd.none
-    | RotateRight -> { model with RotationAngle = model.RotationAngle - 1 }, Cmd.none
+    | RotateLeft ->
+        match model.CurrentImage with
+        | Resolved (Ok img) ->
+            let rot = Rotation.rotateLeft img.Rotation
+            // todo dispose prev rotated image
+            let rotated = rotateBitmap img.OriginalImage rot
+            let img = { img with Rotation = rot; RotatedImage = rotated }
+            { model with CurrentImage = Resolved ^ Ok img }, Cmd.none
+        | _ -> model, Cmd.none
+    | RotateRight ->
+        match model.CurrentImage with
+        | Resolved (Ok img) ->
+            let rot = Rotation.rotateRight img.Rotation
+            // todo dispose prev rotated image
+            let rotated = rotateBitmap img.OriginalImage rot
+            let img = { img with Rotation = rot; RotatedImage = rotated }
+            { model with CurrentImage = Resolved ^ Ok img }, Cmd.none
+        | _ -> model, Cmd.none
 
             

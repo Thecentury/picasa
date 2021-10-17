@@ -27,6 +27,8 @@ type MainWindow(args : string[]) as this =
         base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
         base.TransparencyBackgroundFallback <- SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
         base.SizeToContent <- SizeToContent.Manual
+        base.AttachDevTools ()
+        
         NativeMenu.SetMenu(this, NativeMenu())
         
         let keyListener (e : KeyEventArgs) =
