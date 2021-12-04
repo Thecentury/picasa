@@ -33,7 +33,6 @@
     <XamMacArch>x86_64</XamMacArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release</OutputPath>
     <ErrorReport>prompt</ErrorReport>
@@ -46,7 +45,11 @@
     <UseRefCounting>true</UseRefCounting>
     <CodeSignEntitlements>Entitlements.plist</CodeSignEntitlements>
     <LinkMode>SdkOnly</LinkMode>
-    <AOTMode>None</AOTMode>
+    <AOTMode>All</AOTMode>
+    <HybridAOT>true</HybridAOT>
+    <XamMacArch>x86_64</XamMacArch>
+    <CodeSigningKey>Mac Developer</CodeSigningKey>
+    <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
