@@ -10,7 +10,7 @@ namespace Picasa
     [Register("AppDelegate")]
     public class AppDelegate : NSApplicationDelegate
     {
-        private static void Log (string s)
+        private static void Log(string s)
         {
             var personal = Environment.GetFolderPath(Environment.SpecialFolder.Personal);
             var fullLogPath = Path.Combine(personal, "Downloads/picasa.log");
@@ -21,21 +21,24 @@ namespace Picasa
                 writer.Flush();
             }
         }
+        
+        // ReSharper disable once UnusedParameter.Local
+        private static void LogVerbose(string _) { }
 
         public override void DidFinishLaunching(NSNotification notification)
         {
-            Log("DidFinishLaunching");
+            LogVerbose("DidFinishLaunching");
         }
 
         public override void WillTerminate(NSNotification notification)
         {
-            Log("WillTerminate");
+            LogVerbose("WillTerminate");
         }
 
         [Export("application:openFile:")]
         public override bool OpenFile(NSApplication sender, string filename)
         {
-            Log($"Open file '{filename}'");
+            LogVerbose($"Open file '{filename}'");
             try
             {
                 using (var currentProcess = Process.GetCurrentProcess())
@@ -48,8 +51,8 @@ namespace Picasa
                         Arguments = $"{picasaLocation} \"{filename}\" {currentProcess.Id}",
                         WindowStyle = ProcessWindowStyle.Maximized
                     };
-                    
-                    Log($"Launching Picasa.dll. Location: '{picasaLocation}', PID: {currentProcess.Id}");
+
+                    LogVerbose($"Launching Picasa.dll. Location: '{picasaLocation}', PID: {currentProcess.Id}");
                     
                     using (var _ = Process.Start(psi))
                     {
