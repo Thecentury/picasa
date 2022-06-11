@@ -10,17 +10,18 @@ module Seq =
     let skipSafe (num: int) (source: seq<'a>) : seq<'a> =
         seq {
             use e = source.GetEnumerator()
-            let idx = ref 0
-            let loop = ref true
-            while !idx < num && !loop do
+            let mutable index = 0
+            let mutable loop = true
+            while index < num && loop do
                 if not(e.MoveNext()) then
-                    loop := false
-                idx := !idx + 1
+                    loop <- false
+                index <- index + 1
 
             while e.MoveNext() do
                 yield e.Current 
         }
 
+[<Struct>]
 type Deferred<'t> =
     | HasNotStartedYet
     | InProgress
@@ -28,10 +29,12 @@ type Deferred<'t> =
     
 type DeferredResult<'t> = Deferred<Result<'t, string>>
 
+[<return: Struct>]
 let (|ResolvedOk|_|) = function
-    | Resolved (Ok v) -> Some v
-    | _ -> None
+    | Resolved (Ok v) -> ValueSome v
+    | _ -> ValueNone
 
+[<Struct>]
 type AsyncOperationStatus<'t> =
     | Started
     | Finished of 't

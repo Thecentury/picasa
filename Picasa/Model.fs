@@ -13,14 +13,14 @@ type Model = {
     OtherImages : DeferredResult<SurroundingFiles>
     CurrentImagePath : Path
     CurrentImage : DeferredResult<RotatedImage>
-    CachedImages : Cache<Path, Result<RotatedImage, string>>
+    CachedImages : Cache<Path, Rotation, Result<RotatedImage, string>>
     WindowSize : Option<Size>
 }
 
 type Msg =
     | StartLoadingImage of Path
-    | StartReadingNeighboars
-    | NeighboarsLoaded of Result<SurroundingFiles, string>
+    | StartReadingNeighbours
+    | NeighboursLoaded of Result<SurroundingFiles, string>
     | ImageLoaded of Path * Result<RotatedImage, string>
     | NavigateLeft
     | NavigateRight
@@ -42,15 +42,15 @@ module Model =
         
     let initialWithCommands path =
         let model = initial path
-        (model, Cmd.batch [Cmd.ofMsg ^ StartLoadingImage path; Cmd.ofMsg StartReadingNeighboars])
+        (model, Cmd.batch [Cmd.ofMsg ^ StartLoadingImage path; Cmd.ofMsg StartReadingNeighbours])
             
 let update (msg : Msg) (model : Model) =
     match msg with
-    | StartReadingNeighboars ->
-        let cmd = Cmd.OfAsync.perform (runAsynchronously loadOtherImages) model.CurrentImagePath NeighboarsLoaded
+    | StartReadingNeighbours ->
+        let cmd = Cmd.OfAsync.perform (runAsynchronously loadOtherImages) model.CurrentImagePath NeighboursLoaded
         { model with OtherImages = InProgress }, cmd
-    | NeighboarsLoaded neighboars ->
-        match neighboars with
+    | NeighboursLoaded neighbours ->
+        match neighbours with
         | Ok n ->
             let preload =
                 [n.Left |> List.tryHead; n.Right |> List.tryHead]
@@ -62,23 +62,27 @@ let update (msg : Msg) (model : Model) =
     | StartLoadingImage path ->
         let cachedImage = model.CachedImages.TryFind path
         match cachedImage with
-        | Some img -> model, Cmd.ofMsg ^ ImageLoaded (path, img)
-        | None ->
+        | Some img, _ -> model, Cmd.ofMsg ^ ImageLoaded (path, img)
+        | None, savedRotation ->
             let currentImage =
                 if path = model.CurrentImagePath then
                     InProgress
                 else
                     model.CurrentImage
-            let cmd = Cmd.OfAsync.perform (runAsynchronously loadImage) path (fun img -> ImageLoaded (path, img))
+            let cmd = Cmd.OfAsync.perform (runAsynchronously loadImage) (path, savedRotation) (fun img -> ImageLoaded (path, img))
             { model with CurrentImage = currentImage }, cmd
     | ImageLoaded (path, img) ->
-        let currentImage =
+        let rotation =
+            match img with
+            | Ok img -> img.Rotation
+            | Error _ -> Rotation.NoRotation
+        model.CachedImages.Add path rotation img
+        let model =
             if path = model.CurrentImagePath then
-                Resolved img
+                { model with CurrentImage = Resolved img }
             else
-                model.CurrentImage
-        model.CachedImages.Add path img
-        { model with CurrentImage = currentImage }, Cmd.none
+                model
+        model, Cmd.none
     | NavigateLeft ->
         match model.OtherImages with
         | ResolvedOk { Left = l :: ls; Right = rs } ->
@@ -160,5 +164,6 @@ let update (msg : Msg) (model : Model) =
         match model.CurrentImage with
         | Resolved (Ok img) ->
             let rotated = rotateImage img dir
+            // todo mikbri update rotation in the cached image
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
         | _ -> model, Cmd.none            

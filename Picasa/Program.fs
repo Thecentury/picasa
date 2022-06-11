@@ -59,7 +59,7 @@ type MainWindow(args : string[]) as this =
             printfn $"Msg %A{msg}"
             let model', cmd = update msg model
             if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
-                titleWasSet := true
+                titleWasSet.Value <- true
                 let fileName = Path.GetFileName model'.CurrentImagePath.Value
                 this.Title <- $"Picasa - {fileName}"
             (model', cmd)
@@ -111,13 +111,13 @@ module Program =
         try
             let args = Environment.GetCommandLineArgs()
             if args.Length >= 3 then
-                let parsed, id = Int32.TryParse args.[2]
+                let parsed, id = Int32.TryParse args[2]
                 if parsed then
                     use parent = Process.GetProcessById(id)
                     parent.Kill ()
                     logger.Info $"Killed parent by PID '{id}'"
                 else
-                    logger.Info $"Failed to parse parent PID '{args.[2]}' as int"
+                    logger.Info $"Failed to parse parent PID '{args[2]}' as int"
         with
         | e ->
             logger.Error(e, "Failed to kill parent process")

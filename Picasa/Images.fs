@@ -5,12 +5,12 @@ open Avalonia.Media.Imaging
 
 open Prelude
 
-let loadImage (Path path) =
+let loadImage (Path path, orientation : Option<Rotation>) =
     let bmp = new Bitmap (path) :> IBitmap
     {
         OriginalImage = bmp
         RotatedImage = bmp
-        Rotation = NoRotation
+        Rotation = orientation |> Option.defaultValue NoRotation
     }
 
 let rotatePixelSize (s : PixelSize) = function
