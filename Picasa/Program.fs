@@ -64,9 +64,6 @@ type MainWindow(args : string[]) as this =
                 this.Title <- $"Picasa - {fileName}"
             (model', cmd)
 
-        //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
-        //this.VisualRoot.VisualRoot.Renderer.DrawDirtyRects <- true
-        
         Elmish.Program.mkProgram (fun () -> model) wrappedUpdate UI.view
         |> Program.withHost this
         |> Program.withSubscription (fun _model ->
