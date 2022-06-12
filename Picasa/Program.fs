@@ -121,9 +121,23 @@ module Program =
         with
         | e ->
             logger.Error(e, "Failed to kill parent process")
+            
+    let deleteFile (fileName : string) =
+        use p = Process.Start("osascript", $"-e \"tell app \\\"Finder\\\" to move the POSIX file \\\"{fileName}\\\" to trash\"")
+        p.WaitForExit ()
+        Console.WriteLine $"Exit code: {p.ExitCode}"
 
     [<EntryPoint>]
     let main(args: string[]) =
+        let fileName = "/Users/mic/Desktop/log.txt"
+        let createFile () =
+            if not ^ File.Exists fileName then
+                use fs = File.CreateText fileName
+                fs.WriteLine "Hello"
+                ()
+        createFile ()
+        deleteFile fileName
+        
         try
             try
                 AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
