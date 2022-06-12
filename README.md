@@ -22,4 +22,5 @@ Application consists of two parts:
 
 * [ ] Write an instruction on how to build the application and what its dependencies are.
 * [ ] Create a redistributable package.
+* [ ] Set up a GitHub Actions workflow to build the application.
 
