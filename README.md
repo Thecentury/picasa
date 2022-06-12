@@ -16,7 +16,7 @@ Application consists of two parts:
 
 ## Planned features
 
-- Ability to delete a currently displayed image.
+- Ability to delete a currently displayed image (try using [https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic.fileio.filesystem.deletefile?view=net-6.0](https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic.fileio.filesystem.deletefile?view=net-6.0) if it is cross-platform?
 
 ## TODO
 
