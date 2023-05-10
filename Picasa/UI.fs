@@ -5,6 +5,7 @@ open Avalonia.FuncUI.DSL
 open Avalonia.Controls
 open Avalonia.Layout
 open Avalonia.Media
+open System.IO
 open Picasa.Model
 
 let view (model : Model) _dispatch =
@@ -35,7 +36,7 @@ let view (model : Model) _dispatch =
             ] |> generalize
 
     let caption =
-        let fileName = System.IO.Path.GetFileName model.CurrentImagePath.Value
+        let fileName = Path.GetFileName model.CurrentImagePath.Value
         
         let position =
             match model.OtherImages with

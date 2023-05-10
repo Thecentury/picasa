@@ -26,6 +26,7 @@ type Msg =
     | NavigateRight
     | NavigateToTheBeginning
     | NavigateToTheEnd
+    | CopyToClipboard
     | Rotate of RotationDirection
     | WindowSizeChanged of Size
 
@@ -43,8 +44,11 @@ module Model =
     let initialWithCommands path =
         let model = initial path
         (model, Cmd.batch [Cmd.ofMsg ^ StartLoadingImage path; Cmd.ofMsg StartReadingNeighbours])
+        
+type IEnvironment =
+    abstract member CopyToClipboard : Path -> RotatedImage -> Async<unit>
             
-let update (msg : Msg) (model : Model) =
+let update (env : IEnvironment) (msg : Msg) (model : Model) =
     match msg with
     | StartReadingNeighbours ->
         let cmd = Cmd.OfAsync.perform (runAsynchronously loadOtherImages) model.CurrentImagePath NeighboursLoaded
@@ -166,4 +170,10 @@ let update (msg : Msg) (model : Model) =
             let rotated = rotateImage img dir
             // todo mikbri update rotation in the cached image
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
-        | _ -> model, Cmd.none            
+        | _ -> model, Cmd.none
+    | CopyToClipboard ->
+        match model.CurrentImage with
+        | Resolved (Ok img) ->
+            Cmd.OfAsync.start ^ env.CopyToClipboard model.CurrentImagePath img
+        | _ -> ()
+        model, Cmd.none

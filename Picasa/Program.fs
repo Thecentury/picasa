@@ -54,10 +54,11 @@ type MainWindow(args : string[]) as this =
         let model = Model.initialWithCommands (Path imagePath)
         
         let titleWasSet = ref false
+        
+        let env = Environment.environment ()
 
         let wrappedUpdate msg model =
-            printfn $"Msg %A{msg}"
-            let model', cmd = update msg model
+            let model', cmd = update env msg model
             if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
                 titleWasSet.Value <- true
                 let fileName = Path.GetFileName model'.CurrentImagePath.Value
@@ -76,6 +77,8 @@ type MainWindow(args : string[]) as this =
                     | Key.Right, KeyModifiers.Control -> dispatch Msg.NavigateToTheEnd
                     | Key.OemOpenBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Left
                     | Key.OemCloseBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Right
+                    // todo should be Ctrl + C on Windows. Use keyboard gestures?
+                    | Key.C, KeyModifiers.Meta -> dispatch Msg.CopyToClipboard
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
