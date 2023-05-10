@@ -44,7 +44,8 @@ type CacheRecord<'a, 'weak>(value : 'a, weakValue : 'weak) =
         match ref with
         | StrongRef v -> ref <- WeakRef (WeakReference<_>({ Boxed = v }))
         | _ -> ()
-        
+
+#nowarn "3536"
 type IDeletionPolicy =
     abstract Process<'a, 'weak> : ICollection<CacheRecord<'a, 'weak>> -> unit
     
