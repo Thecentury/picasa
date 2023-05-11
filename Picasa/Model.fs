@@ -34,7 +34,7 @@ type Msg =
     | Rotate of RotationDirection
     | WindowSizeChanged of Size
     | RequestDeleteCurrentImage
-    | CurrentImageDeleted of Result<unit, string>
+    | ImageDeleted of Path * Result<unit, string>
 
 module Model =
 
@@ -175,15 +175,43 @@ let update (services : IServices) (msg : Msg) (model : Model) =
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
         | _ -> model, Cmd.none
     | RequestDeleteCurrentImage ->
-        let cmd = Cmd.OfAsync.perform services.DeleteImage model.CurrentImagePath CurrentImageDeleted
+        let processResult result =
+            ImageDeleted (model.CurrentImagePath, result)
+        let cmd = Cmd.OfAsync.perform services.DeleteImage model.CurrentImagePath processResult
         model, cmd
-    | CurrentImageDeleted (Ok ()) ->
-        match model.OtherImages with
-        | ResolvedOk { Right = _ :: _ } ->
-            model, Cmd.ofMsg NavigateRight
-        | _ ->
-            // todo handle deletion of the last image
-            model, Cmd.ofMsg NavigateLeft
-    | CurrentImageDeleted (Error _) ->
+    | ImageDeleted (removedImage, Ok ()) ->
+        model.CachedImages.Remove removedImage
+        if model.CurrentImagePath = removedImage then
+            match model.OtherImages with
+            | ResolvedOk { Left = []; Right = [] } ->
+                // todo handle deletion of the last image
+                model, Cmd.none
+            // Can move to the right
+            | ResolvedOk { Left = ls; Right = r :: rs } ->
+                let preloadNextImage = rs |> List.tryHead |> Option.map (StartLoadingImage >> Cmd.ofMsg) |> Option.toList
+                let cmds = [Cmd.ofMsg ^ StartLoadingImage r] @ preloadNextImage
+                let otherImages = { Left = ls; Right = rs }
+                let model =
+                    { model with
+                        OtherImages = Resolved ^ Ok otherImages
+                        CurrentImagePath = r
+                        CurrentImage = InProgress }
+                model, Cmd.batch cmds
+            | ResolvedOk { Left = l :: ls; Right = rs } ->
+                let preloadNextImage = ls |> List.tryHead |> Option.map (StartLoadingImage >> Cmd.ofMsg) |> Option.toList
+                let cmds = [Cmd.ofMsg ^ StartLoadingImage l] @ preloadNextImage
+                let otherImages = { Left = ls; Right = rs }
+                let model =
+                    { model with
+                        OtherImages = Resolved ^ Ok otherImages
+                        CurrentImagePath = l
+                        CurrentImage = InProgress }
+                model, Cmd.batch cmds
+            | _ -> model, Cmd.none
+        else
+            match model.OtherImages with
+            | ResolvedOk otherImages -> { model with OtherImages = Resolved ^ Ok ^ removePath removedImage otherImages }, Cmd.none
+            | _ -> model, Cmd.none
+    | ImageDeleted (_, Error _) ->
         // todo let the user know that the image could not be deleted
         model, Cmd.none

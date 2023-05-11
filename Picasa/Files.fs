@@ -17,7 +17,11 @@ type SurroundingFiles = {
     Right : List<Path>
 }
 
-let loadOtherImages (Path current) = 
+let removePath (path : Path) (files : SurroundingFiles) =
+    { Left = List.filter (fun p -> p <> path) files.Left
+      Right = List.filter (fun p -> p <> path) files.Right }
+
+let loadOtherImages (Path current) =
     let dir = Path.GetDirectoryName current
     let initialState = {
         Left = []
@@ -34,7 +38,7 @@ let loadOtherImages (Path current) =
         | _ ->
             { Left = state.Left
               Right = (Path file) :: state.Right }
-            
+
     let otherImages =
         filters
         |> Seq.collect (fun f -> Directory.EnumerateFiles (dir, f, EnumerationOptions(MatchCasing = MatchCasing.CaseInsensitive)))
