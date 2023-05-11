@@ -22,7 +22,7 @@ open Picasa.Model
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
     do
-        let backgroundBrush = SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy)) 
+        let backgroundBrush = SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
         base.Title <- "Picasa"
         base.WindowState <- WindowState.Maximized
         base.ShowInTaskbar <- false
@@ -31,9 +31,9 @@ type MainWindow(args : string[]) as this =
         base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
 //        base.AttachDevTools ()
-        
+
         NativeMenu.SetMenu(this, NativeMenu())
-        
+
         let keyListener (e : KeyEventArgs) =
             match e.Key with
             | Key.Escape -> this.Close ()
@@ -52,12 +52,13 @@ type MainWindow(args : string[]) as this =
                 failwith "Path was not provided"
 
         let model = Model.initialWithCommands (Path imagePath)
-        
+        let services = Services.services ()
+
         let titleWasSet = ref false
 
         let wrappedUpdate msg model =
             printfn $"Msg %A{msg}"
-            let model', cmd = update msg model
+            let model', cmd = update services msg model
             if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
                 titleWasSet.Value <- true
                 let fileName = Path.GetFileName model'.CurrentImagePath.Value
@@ -98,10 +99,10 @@ type App() =
             let mainWindow = MainWindow(desktopLifetime.Args)
             desktopLifetime.MainWindow <- mainWindow
         | _ -> ()
-        
+
 
 module Program =
-    
+
     let logger = LogManager.GetCurrentClassLogger()
 
     let closeParent () =
@@ -118,7 +119,7 @@ module Program =
         with
         | e ->
             logger.Error(e, "Failed to kill parent process")
-            
+
     let deleteFile (fileName : string) =
         use p = Process.Start("osascript", $"-e \"tell app \\\"Finder\\\" to move the POSIX file \\\"{fileName}\\\" to trash\"")
         p.WaitForExit ()
@@ -126,6 +127,7 @@ module Program =
 
     [<EntryPoint>]
     let main(args: string[]) =
+        // todo delete this
         let fileName = "/Users/mic/Desktop/log.txt"
         let createFile () =
             if not ^ File.Exists fileName then
@@ -134,13 +136,13 @@ module Program =
                 ()
         createFile ()
         deleteFile fileName
-        
+
         try
             try
                 AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
                 AppDomain.CurrentDomain.ProcessExit.Add (fun _ -> closeParent ())
                 logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
-                
+
                 let locator = AvaloniaLocator.Current :?> AvaloniaLocator
                 let opts = AvaloniaNativePlatformOptions(UseGpu = false)
                 locator.BindToSelf(opts) |> ignore
@@ -151,9 +153,9 @@ module Program =
                         .UsePlatformDetect()
                         .UseSkia()
                         .StartWithClassicDesktopLifetime(args)
-                    
+
                 logger.Info "Done"
-                
+
                 exitCode
             finally
                 closeParent ()

@@ -8,7 +8,12 @@ open Picasa
 open Caching
 open Files
 open Images
-    
+
+(*--------------------------------------------------------------------------------------------------------------------*)
+
+type IServices =
+    abstract member DeleteImage : Path -> Async<Result<unit, string>>
+
 type Model = {
     OtherImages : DeferredResult<SurroundingFiles>
     CurrentImagePath : Path
@@ -28,9 +33,11 @@ type Msg =
     | NavigateToTheEnd
     | Rotate of RotationDirection
     | WindowSizeChanged of Size
+    | RequestDeleteCurrentImage
+    | CurrentImageDeleted of Result<unit, string>
 
 module Model =
-    
+
     let initial path =
         {
             OtherImages = HasNotStartedYet
@@ -39,12 +46,12 @@ module Model =
             CachedImages = Cache(notMoreThanDeletionPolicy 10)
             WindowSize = None
         }
-        
+
     let initialWithCommands path =
         let model = initial path
         (model, Cmd.batch [Cmd.ofMsg ^ StartLoadingImage path; Cmd.ofMsg StartReadingNeighbours])
-            
-let update (msg : Msg) (model : Model) =
+
+let update (services : IServices) (msg : Msg) (model : Model) =
     match msg with
     | StartReadingNeighbours ->
         let cmd = Cmd.OfAsync.perform (runAsynchronously loadOtherImages) model.CurrentImagePath NeighboursLoaded
@@ -166,4 +173,17 @@ let update (msg : Msg) (model : Model) =
             let rotated = rotateImage img dir
             // todo mikbri update rotation in the cached image
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
-        | _ -> model, Cmd.none            
+        | _ -> model, Cmd.none
+    | RequestDeleteCurrentImage ->
+        let cmd = Cmd.OfAsync.perform services.DeleteImage model.CurrentImagePath CurrentImageDeleted
+        model, cmd
+    | CurrentImageDeleted (Ok ()) ->
+        match model.OtherImages with
+        | ResolvedOk { Right = _ :: _ } ->
+            model, Cmd.ofMsg NavigateRight
+        | _ ->
+            // todo handle deletion of the last image
+            model, Cmd.ofMsg NavigateLeft
+    | CurrentImageDeleted (Error _) ->
+        // todo let the user know that the image could not be deleted
+        model, Cmd.none
