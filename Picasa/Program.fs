@@ -30,7 +30,7 @@ type MainWindow(args : string[]) as this =
         base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
         base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
-//        base.AttachDevTools ()
+        let logger = LogManager.GetCurrentClassLogger()
 
         NativeMenu.SetMenu(this, NativeMenu())
 
@@ -39,14 +39,12 @@ type MainWindow(args : string[]) as this =
             | Key.Escape -> this.Close ()
             | _ -> ()
         this.KeyDown.Add keyListener
-//        base.SystemDecorations <- SystemDecorations.None
 
         let imagePath =
             match args with
             | [| path; _ |]
             | [| path |] -> path
             | _ ->
-                let logger = LogManager.GetCurrentClassLogger ()
                 logger.Warn "Path was not provided, exiting"
                 this.Close ()
                 failwith "Path was not provided"
@@ -57,7 +55,9 @@ type MainWindow(args : string[]) as this =
         let titleWasSet = ref false
 
         let wrappedUpdate msg model =
-            printfn $"Msg %A{msg}"
+            if logger.IsTraceEnabled then
+                logger.Trace $"Msg %A{msg}"
+
             let model', cmd = update services msg model
             if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
                 titleWasSet.Value <- true
@@ -84,8 +84,12 @@ type MainWindow(args : string[]) as this =
                     | _ -> ()
                 this.KeyDown.Add keyDownCallback
 
+                let mutable clientSize = Size()
                 let layoutUpdatedHandler _ =
-                    dispatch (Msg.WindowSizeChanged this.ClientSize)
+                    let newSize = this.ClientSize
+                    if newSize <> clientSize then
+                        clientSize <- newSize
+                        dispatch (Msg.WindowSizeChanged newSize)
                 this.LayoutUpdated.Add layoutUpdatedHandler
 
             Cmd.ofSub sub)
@@ -124,23 +128,8 @@ module Program =
         | e ->
             logger.Error(e, "Failed to kill parent process")
 
-    let deleteFile (fileName : string) =
-        use p = Process.Start("osascript", $"-e \"tell app \\\"Finder\\\" to move the POSIX file \\\"{fileName}\\\" to trash\"")
-        p.WaitForExit ()
-        Console.WriteLine $"Exit code: {p.ExitCode}"
-
     [<EntryPoint>]
     let main(args: string[]) =
-        // todo delete this
-        let fileName = "/Users/mic/Desktop/log.txt"
-        let createFile () =
-            if not ^ File.Exists fileName then
-                use fs = File.CreateText fileName
-                fs.WriteLine "Hello"
-                ()
-        createFile ()
-        deleteFile fileName
-
         try
             try
                 AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))

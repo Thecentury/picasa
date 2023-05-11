@@ -11,6 +11,7 @@ let logger = LogManager.GetCurrentClassLogger ()
 
 let private deleteImageImpl (Path path) = async {
     if RuntimeInformation.IsOSPlatform(OSPlatform.OSX) then
+        logger.Debug $"Deleting '{path}'"
         use p = Process.Start("osascript", $"-e \"tell app \\\"Finder\\\" to move the POSIX file \\\"{path}\\\" to trash\"")
         do! p.WaitForExitAsync () |> Async.AwaitTask
         let exitCode = p.ExitCode

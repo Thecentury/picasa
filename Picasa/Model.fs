@@ -197,6 +197,7 @@ let update (services : IServices) (msg : Msg) (model : Model) =
                         CurrentImagePath = r
                         CurrentImage = InProgress }
                 model, Cmd.batch cmds
+            // Can move to the left
             | ResolvedOk { Left = l :: ls; Right = rs } ->
                 let preloadNextImage = ls |> List.tryHead |> Option.map (StartLoadingImage >> Cmd.ofMsg) |> Option.toList
                 let cmds = [Cmd.ofMsg ^ StartLoadingImage l] @ preloadNextImage
