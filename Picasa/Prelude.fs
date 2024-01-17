@@ -18,7 +18,7 @@ module Seq =
                 index <- index + 1
 
             while e.MoveNext() do
-                yield e.Current 
+                yield e.Current
         }
 
 [<Struct>]
@@ -26,7 +26,7 @@ type Deferred<'t> =
     | HasNotStartedYet
     | InProgress
     | Resolved of 't
-    
+
 type DeferredResult<'t> = Deferred<Result<'t, string>>
 
 [<return: Struct>]
@@ -53,19 +53,19 @@ let runAsynchronously f arg = async {
 [<Struct>]
 type Path = Path of string with
     member this.Value = let (Path path) = this in path
-    
+
 [<Struct>]
 type Rotation =
     | NoRotation
     | Right90
     | Right180
     | Right270
-    
+
 [<Struct>]
 type RotationDirection = Left | Right
-    
+
 module Rotation =
-    
+
     let rotateRight = function
         | NoRotation -> Right90
         | Right90 -> Right180
@@ -77,12 +77,12 @@ module Rotation =
         | Right90 -> NoRotation
         | Right180 -> Right90
         | Right270 -> Right180
-        
+
     let rotate rotation dir =
         match dir with
         | Left -> rotateLeft rotation
         | Right -> rotateRight rotation
-        
+
     let toAngle = function
         | NoRotation -> 0
         | Right90 -> 90
