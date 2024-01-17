@@ -36,19 +36,19 @@ let view (model : Model) _dispatch =
 
     let caption =
         let fileName = System.IO.Path.GetFileName model.CurrentImagePath.Value
-        
+
         let position =
             match model.OtherImages with
             | ResolvedOk { Left = left; Right = right } ->
                 $"{left.Length + 1} / {left.Length + 1 + right.Length} — "
             | _ -> ""
-            
+
         let fullCaption =
             match model.CurrentImage with
             | Resolved (Ok img) -> $"{fileName} - {img.OriginalImage.PixelSize.Width} × {img.OriginalImage.PixelSize.Height}"
             | _ -> fileName
         let fullCaption = position + fullCaption
-        
+
         TextBlock.create [
             TextBlock.text fullCaption
             TextBlock.horizontalAlignment HorizontalAlignment.Center

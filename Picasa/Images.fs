@@ -29,7 +29,7 @@ let rotateBitmap (bmp : IBitmap) rotation =
         let correction =
             if other = Right180 then
                 Matrix.Identity
-            else 
+            else
                 let diff = float ^ abs (bmp.PixelSize.Width - bmp.PixelSize.Height)
                 if bmp.PixelSize.Width < bmp.PixelSize.Height then
                     Matrix.CreateTranslation (diff * 0.5, -diff * 0.5)
@@ -43,11 +43,11 @@ let rotateBitmap (bmp : IBitmap) rotation =
             correction
         let rect = Rect(bmp.PixelSize.ToSize(1.))
         dc.DrawBitmap (bmp.PlatformImpl, 1.0, rect, rect)
-        
+
         dc.Dispose ()
-        
+
         r :> IBitmap
-        
+
 let rotateImage (img : RotatedImage) direction =
     let nextRotation = Rotation.rotate img.Rotation direction
 
