@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition="'$(Configutation)' == 'Release'">
     <!--    <PublishSingleFile>true</PublishSingleFile>-->
     <!--    <SelfContained>true</SelfContained>-->
