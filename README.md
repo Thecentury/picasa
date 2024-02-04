@@ -2,9 +2,9 @@
 
 Built using [Avalonia](https://avaloniaui.net/) and [FuncUI](https://github.com/fsprojects/Avalonia.FuncUI).
 
-Application consists of two parts:
+The application consists of two parts:
 - PicasaLauncher — a thin macOS .app-like wrapper built using [Mono](https://www.mono-project.com/) to be able to associate image file types with the application;
-- Picasa itself — a .net 6.0 Avalonia application.
+- Picasa itself — a .net 8.0 Avalonia application.
 
 ![Application screenshot](./images/Picasa-Geese.jpg)
 
@@ -14,13 +14,14 @@ Application consists of two parts:
 - `Ctrl+Left`/`Ctrl+Right` — navigate to the first/last image in the folder;
 - `[`/`]` — rotate image left/right.
 
-## Planned features
-
-- Ability to delete a currently displayed image (try using [https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic.fileio.filesystem.deletefile?view=net-6.0](https://docs.microsoft.com/en-us/dotnet/api/microsoft.visualbasic.fileio.filesystem.deletefile?view=net-6.0) if it is cross-platform?)
-
 ## TODO
 
 * [ ] Write an instruction on how to build the application and what its dependencies are.
 * [ ] Create a redistributable package.
 * [ ] Set up a GitHub Actions workflow to build the application.
 
+* [ ] Native macOS menu
+* [ ] Multiple windows (if the app is activated while open)
+* [ ] Doesn't save image orientation after moving to another one
+* [ ] Extract image orientation from EXIF
+* [ ] Update README

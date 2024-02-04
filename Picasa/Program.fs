@@ -7,6 +7,7 @@ open Avalonia.Controls
 open Avalonia.Input
 open Avalonia.Media
 open Avalonia.Themes.Fluent
+open Avalonia.Threading
 open Elmish
 open Avalonia.FuncUI.Elmish
 open Avalonia.FuncUI.Hosts
@@ -102,7 +103,7 @@ type MainWindow(args : string[]) as this =
                 }
 
             [["Keyboard"], sub])
-        |> Program.run
+        |> Program.runWithAvaloniaSyncDispatch ()
 
 type App() =
     inherit Application()
@@ -110,6 +111,7 @@ type App() =
     override this.Initialize() =
         this.Styles.Add (FluentTheme ())
         this.RequestedThemeVariant <- Styling.ThemeVariant.Light
+        this.Name <- "Picasa"
 
     override this.OnFrameworkInitializationCompleted() =
         match this.ApplicationLifetime with
@@ -119,13 +121,16 @@ type App() =
                     let filePath = args.Uri.ToString().Replace("file://", "")
                     Log.Information($"Activated with {filePath}")
 
-                    match desktopLifetime.MainWindow |> Option.ofObj with
-                    | Some _ ->
-                        let mainWindow = MainWindow [| filePath |]
-                        mainWindow.Show ()
-                    | None ->
-                        let mainWindow = MainWindow [| filePath |]
-                        desktopLifetime.MainWindow <- mainWindow
+                    Dispatcher.UIThread.Post(fun () ->
+                        match desktopLifetime.MainWindow |> Option.ofObj with
+                        | Some _ ->
+                            let mainWindow = MainWindow [| filePath |]
+                            mainWindow.Show ()
+                        | None ->
+                            let mainWindow = MainWindow [| filePath |]
+                            desktopLifetime.MainWindow <- mainWindow
+                            mainWindow.Show ()
+                    )
                 | _ -> ()
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
             match desktopLifetime.Args with
@@ -154,10 +159,19 @@ module Program =
             AppDomain.CurrentDomain.UnhandledException.Add (fun e -> Log.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
             Log.Verbose($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
 
-            // todo
-            // let locator = AvaloniaLocator.Current :?> AvaloniaLocator
-            // let opts = AvaloniaNativePlatformOptions(UseGpu = false)
-            // locator.BindToSelf(opts) |> ignore
+            match AvaloniaLocator.Current.GetService<MacOSPlatformOptions>() |> Option.ofObj with
+            | Some options -> options.DisableNativeMenus <- false
+            | None ->
+                let options = MacOSPlatformOptions(DisableNativeMenus=false)
+                AvaloniaLocator.CurrentMutable.BindToSelf options |> ignore
+                Log.Debug "Registering MacOSPlatformOptions"
+
+            match AvaloniaLocator.Current.GetService<AvaloniaNativePlatformOptions>() |> Option.ofObj with
+            | Some options -> options.RenderingMode <- [| AvaloniaNativeRenderingMode.Software |]
+            | None ->
+                let options = AvaloniaNativePlatformOptions(RenderingMode = [| AvaloniaNativeRenderingMode.Software |])
+                AvaloniaLocator.CurrentMutable.BindToSelf options |> ignore
+                Log.Debug "Registering AvaloniaNativePlatformOptions"
 
             let exitCode =
                 AppBuilder
