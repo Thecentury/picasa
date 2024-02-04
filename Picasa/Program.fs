@@ -144,6 +144,7 @@ module Program =
                         .Configure<App>()
                         .UsePlatformDetect()
                         .UseSkia()
+                        .UseAvaloniaNative()
                         .StartWithClassicDesktopLifetime(args)
 
                 logger.Info "Done"
