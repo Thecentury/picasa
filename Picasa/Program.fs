@@ -30,14 +30,11 @@ type MainWindow(args : string[]) as this =
         base.ShowInTaskbar <- false
         base.Background <- backgroundBrush
         base.TransparencyLevelHint <- [|
-            WindowTransparencyLevel.AcrylicBlur
             WindowTransparencyLevel.Blur
             WindowTransparencyLevel.Transparent
         |]
         base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
-
-        NativeMenu.SetMenu(this, NativeMenu())
 
         let keyListener (e : KeyEventArgs) =
             match e.Key with
