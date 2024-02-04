@@ -4,8 +4,10 @@ open System
 open System.Collections.Generic
 open FSharp.Core.Fluent
 
-open NLog
 open Picasa
+open Serilog
+
+(*--------------------------------------------------------------------------------------------------------------------*)
 
 type Box<'a> = {
     Boxed : 'a
@@ -31,7 +33,7 @@ type CacheRecord<'a, 'weak>(value : 'a, weakValue : 'weak) =
             match empty, box value with
             | true, _
             | _, null ->
-                LogManager.GetCurrentClassLogger().Debug "WeakReference is empty"
+                Log.Debug "WeakReference is empty"
                 None
             | _ ->
                 lastAccessTime <- DateTime.UtcNow

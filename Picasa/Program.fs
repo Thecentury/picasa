@@ -1,9 +1,7 @@
 namespace Picasa
 
 open System
-open System.Diagnostics
 open System.IO
-open Prelude
 open Avalonia
 open Avalonia.Controls
 open Avalonia.Input
@@ -13,10 +11,14 @@ open Elmish
 open Avalonia.FuncUI.Elmish
 open Avalonia.FuncUI.Hosts
 open Avalonia.Controls.ApplicationLifetimes
+open Serilog
 
-open NLog
 open Picasa
-open Picasa.Model
+
+open Model
+open Serilog.Events
+
+(*--------------------------------------------------------------------------------------------------------------------*)
 
 type MainWindow(args : string[]) as this =
     inherit HostWindow()
@@ -33,7 +35,6 @@ type MainWindow(args : string[]) as this =
         |]
         base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
-        let logger = LogManager.GetCurrentClassLogger()
 
         NativeMenu.SetMenu(this, NativeMenu())
 
@@ -48,7 +49,7 @@ type MainWindow(args : string[]) as this =
             | [| path; _ |]
             | [| path |] -> path
             | _ ->
-                logger.Warn "Path was not provided, exiting"
+                Log.Warning "Path was not provided, exiting"
                 this.Close ()
                 failwith "Path was not provided"
 
@@ -58,8 +59,8 @@ type MainWindow(args : string[]) as this =
         let titleWasSet = ref false
 
         let wrappedUpdate msg model =
-            if logger.IsTraceEnabled then
-                logger.Trace $"Msg %A{msg}"
+            if Log.Logger.IsEnabled(LogEventLevel.Verbose) then
+                Log.Verbose $"Msg %A{msg}"
 
             let model', cmd = update services msg model
             if model.CurrentImagePath <> model'.CurrentImagePath || not titleWasSet.Value then
@@ -112,56 +113,64 @@ type App() =
 
     override this.OnFrameworkInitializationCompleted() =
         match this.ApplicationLifetime with
-        | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
-            let mainWindow = MainWindow(desktopLifetime.Args)
-            desktopLifetime.MainWindow <- mainWindow
-        | _ -> ()
+        | :? IActivatableApplicationLifetime as activatable & (:? IClassicDesktopStyleApplicationLifetime as desktopLifetime) ->
+            activatable.Activated.Add ^ function
+                | :? ProtocolActivatedEventArgs as args ->
+                    let filePath = args.Uri.ToString().Replace("file://", "")
+                    Log.Information($"Activated with {filePath}")
 
+                    match desktopLifetime.MainWindow |> Option.ofObj with
+                    | Some _ ->
+                        let mainWindow = MainWindow [| filePath |]
+                        mainWindow.Show ()
+                    | None ->
+                        let mainWindow = MainWindow [| filePath |]
+                        desktopLifetime.MainWindow <- mainWindow
+                | _ -> ()
+        | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
+            match desktopLifetime.Args with
+            | [| |] ->
+                // No file name provided, closing.
+                ()
+            | args ->
+                let mainWindow = MainWindow args
+                desktopLifetime.MainWindow <- mainWindow
+        | _ -> ()
 
 module Program =
 
-    let logger = LogManager.GetCurrentClassLogger()
-
-    let closeParent () =
-        try
-            let args = Environment.GetCommandLineArgs()
-            if args.Length >= 3 then
-                let parsed, id = Int32.TryParse args[2]
-                if parsed then
-                    use parent = Process.GetProcessById(id)
-                    parent.Kill ()
-                    logger.Info $"Killed parent by PID '{id}'"
-                else
-                    logger.Info $"Failed to parse parent PID '{args[2]}' as int"
-        with
-        | e ->
-            logger.Error(e, "Failed to kill parent process")
-
     [<EntryPoint>]
     let main(args: string[]) =
+        Log.Logger <- LoggerConfiguration()
+          .MinimumLevel.Verbose()
+          .Enrich.FromLogContext()
+          .WriteTo.Console(
+            outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+          )
+          .WriteTo.File(path="/Users/mic/picasa.log", outputTemplate="[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+          .CreateLogger()
+
         try
-            try
-                AppDomain.CurrentDomain.UnhandledException.Add (fun e -> logger.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
-                AppDomain.CurrentDomain.ProcessExit.Add (fun _ -> closeParent ())
-                logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
+            AppDomain.CurrentDomain.UnhandledException.Add (fun e -> Log.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
+            Log.Verbose($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
 
-                // todo
-                // let locator = AvaloniaLocator.Current :?> AvaloniaLocator
-                // let opts = AvaloniaNativePlatformOptions(UseGpu = false)
-                // locator.BindToSelf(opts) |> ignore
+            // todo
+            // let locator = AvaloniaLocator.Current :?> AvaloniaLocator
+            // let opts = AvaloniaNativePlatformOptions(UseGpu = false)
+            // locator.BindToSelf(opts) |> ignore
 
-                let exitCode =
-                    AppBuilder
-                        .Configure<App>()
-                        .UsePlatformDetect()
-                        .StartWithClassicDesktopLifetime(args)
+            let exitCode =
+                AppBuilder
+                    .Configure<App>()
+                    .UsePlatformDetect()
+                    .StartWithClassicDesktopLifetime(args)
 
-                logger.Info "Done"
+            Log.Information "Done"
+            Log.CloseAndFlush ()
 
-                exitCode
-            finally
-                closeParent ()
+            exitCode
         with
         | e ->
-            logger.Error(e, "Unhandled exception")
+            Log.Error(e, "Unhandled exception")
+            Log.CloseAndFlush ()
             -1

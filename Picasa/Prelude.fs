@@ -3,7 +3,9 @@ module Picasa.Prelude
 
 open Avalonia
 open Avalonia.Media.Imaging
-open NLog
+open Serilog
+
+(*--------------------------------------------------------------------------------------------------------------------*)
 
 let (^) f x = f x
 
@@ -46,8 +48,7 @@ let runAsynchronously f arg = async {
         return Ok ^ f arg
     with
     | e ->
-        let logger = LogManager.GetCurrentClassLogger ()
-        logger.Error (e, $"Failed to execute runAsynchronously(%A{f}, %A{arg})")
+        Log.Error (e, $"Failed to execute runAsynchronously(%A{f}, %A{arg})")
         return Error e.Message
 }
 
