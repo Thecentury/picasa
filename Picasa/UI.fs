@@ -1,10 +1,11 @@
 module Picasa.UI
 
-open Avalonia.FuncUI
-open Avalonia.FuncUI.DSL
 open Avalonia.Controls
 open Avalonia.Layout
 open Avalonia.Media
+open Avalonia.FuncUI.Builder
+open Avalonia.FuncUI
+open Avalonia.FuncUI.DSL
 open Picasa.Model
 
 let view (model : Model) _dispatch =

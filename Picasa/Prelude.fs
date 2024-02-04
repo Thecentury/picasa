@@ -1,6 +1,7 @@
 [<AutoOpen>]
 module Picasa.Prelude
 
+open Avalonia
 open Avalonia.Media.Imaging
 open NLog
 
@@ -90,7 +91,12 @@ module Rotation =
         | Right270 -> 270
 
 type RotatedImage = {
-    OriginalImage : IBitmap
-    RotatedImage : IBitmap
+    OriginalImage : Bitmap
+    RotatedImage : Bitmap
     Rotation : Rotation
 }
+
+(*--------------------------------------------------------------------------------------------------------------------*)
+
+type Size with
+    member this.IsDefault = this.Width = 0.0 && this.Height = 0.0

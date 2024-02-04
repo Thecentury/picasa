@@ -26,7 +26,11 @@ type MainWindow(args : string[]) as this =
         base.WindowState <- WindowState.Maximized
         base.ShowInTaskbar <- false
         base.Background <- backgroundBrush
-        base.TransparencyLevelHint <- WindowTransparencyLevel.Transparent
+        base.TransparencyLevelHint <- [|
+            WindowTransparencyLevel.AcrylicBlur
+            WindowTransparencyLevel.Blur
+            WindowTransparencyLevel.Transparent
+        |]
         base.TransparencyBackgroundFallback <- backgroundBrush
         base.SizeToContent <- SizeToContent.Manual
         let logger = LogManager.GetCurrentClassLogger()
@@ -81,7 +85,7 @@ type MainWindow(args : string[]) as this =
                     | Key.Back, KeyModifiers.None
                     | Key.Delete, KeyModifiers.None -> dispatch ^ Msg.RequestDeleteCurrentImage
                     | _ -> ()
-                this.KeyDown.Add keyDownCallback
+                let keyDownSubscription = this.KeyDown.Subscribe keyDownCallback
 
                 let mutable clientSize = Size()
                 let layoutUpdatedHandler _ =
@@ -89,16 +93,22 @@ type MainWindow(args : string[]) as this =
                     if newSize <> clientSize then
                         clientSize <- newSize
                         dispatch (Msg.WindowSizeChanged newSize)
-                this.LayoutUpdated.Add layoutUpdatedHandler
+                let layoutUpdatedSubscription = this.LayoutUpdated.Subscribe layoutUpdatedHandler
+                { new IDisposable with
+                    member _.Dispose () =
+                        keyDownSubscription.Dispose ()
+                        layoutUpdatedSubscription.Dispose ()
+                }
 
-            Cmd.ofSub sub)
+            [["Keyboard"], sub])
         |> Program.run
 
 type App() =
     inherit Application()
 
     override this.Initialize() =
-        this.Styles.Add (FluentTheme(baseUri = null, Mode = FluentThemeMode.Light))
+        this.Styles.Add (FluentTheme ())
+        this.RequestedThemeVariant <- Styling.ThemeVariant.Light
 
     override this.OnFrameworkInitializationCompleted() =
         match this.ApplicationLifetime with
@@ -135,16 +145,15 @@ module Program =
                 AppDomain.CurrentDomain.ProcessExit.Add (fun _ -> closeParent ())
                 logger.Trace($"Launched with args %A{args}. Command line: '%s{Environment.CommandLine}'. Args: %A{Environment.GetCommandLineArgs()}")
 
-                let locator = AvaloniaLocator.Current :?> AvaloniaLocator
-                let opts = AvaloniaNativePlatformOptions(UseGpu = false)
-                locator.BindToSelf(opts) |> ignore
+                // todo
+                // let locator = AvaloniaLocator.Current :?> AvaloniaLocator
+                // let opts = AvaloniaNativePlatformOptions(UseGpu = false)
+                // locator.BindToSelf(opts) |> ignore
 
                 let exitCode =
                     AppBuilder
                         .Configure<App>()
                         .UsePlatformDetect()
-                        .UseSkia()
-                        .UseAvaloniaNative()
                         .StartWithClassicDesktopLifetime(args)
 
                 logger.Info "Done"
