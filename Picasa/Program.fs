@@ -105,13 +105,16 @@ type MainWindow(args : string[]) as this =
             [["Keyboard"], sub])
         |> Program.runWithAvaloniaSyncDispatch ()
 
-type App() =
+type App() as this =
     inherit Application()
+
+    do
+        NativeMenu.SetMenu(this, NativeMenu())
+        this.Name <- "Picasa"
 
     override this.Initialize() =
         this.Styles.Add (FluentTheme ())
         this.RequestedThemeVariant <- Styling.ThemeVariant.Light
-        this.Name <- "Picasa"
 
     override this.OnFrameworkInitializationCompleted() =
         match this.ApplicationLifetime with
