@@ -9,6 +9,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.macOS", "Picasa.macOS\Picasa.macOS.fsproj", "{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.exe", "Picasa.exe\Picasa.exe.fsproj", "{FB42065F-9ADB-4B66-98A9-2A916FE6C596}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
