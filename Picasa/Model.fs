@@ -43,7 +43,7 @@ module Model =
             OtherImages = HasNotStartedYet
             CurrentImagePath = path
             CurrentImage = HasNotStartedYet
-            CachedImages = Cache(notMoreThanDeletionPolicy 10)
+            CachedImages = Cache(notMoreThanDeletionPolicy 100)
             WindowSize = None
         }
 
