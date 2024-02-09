@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionIt
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.macOS", "Picasa.macOS\Picasa.macOS.fsproj", "{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa", "Picasa\Picasa.fsproj", "{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}"
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.exe", "Picasa.exe\Picasa.exe.fsproj", "{FB42065F-9ADB-4B66-98A9-2A916FE6C596}"
 EndProject
