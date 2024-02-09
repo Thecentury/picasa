@@ -6,6 +6,7 @@
     <WarnOn>3390;$(WarnOn)</WarnOn>
     <IsPackable>false</IsPackable>
     <AvaloniaAccessUnstablePrivateApis>true</AvaloniaAccessUnstablePrivateApis>
+    <RootNamespace>Picasa</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configutation)' == 'Release'">

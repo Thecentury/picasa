@@ -10,7 +10,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Picasa\Picasa.fsproj" />
+      <ProjectReference Include="..\Picasa.Core\Picasa.Core.fsproj" />
     </ItemGroup>
 
 </Project>

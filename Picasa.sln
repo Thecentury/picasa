@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa", "Picasa\Picasa.fsproj", "{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.Core", "Picasa.Core\Picasa.Core.fsproj", "{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{D6AA8F7B-A154-451A-A636-C2D934B4F1D5}"
 	ProjectSection(SolutionItems) = preProject
