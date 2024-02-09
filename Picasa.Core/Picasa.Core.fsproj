@@ -7,6 +7,7 @@
     <IsPackable>false</IsPackable>
     <AvaloniaAccessUnstablePrivateApis>true</AvaloniaAccessUnstablePrivateApis>
     <RootNamespace>Picasa</RootNamespace>
+    <NoWarn>AVA3001</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configutation)' == 'Release'">
