@@ -19,9 +19,9 @@ The application consists of two parts:
 * [ ] Write an instruction on how to build the application and what its dependencies are.
 * [ ] Create a redistributable package.
 * [ ] Set up a GitHub Actions workflow to build the application.
-
-* [ ] Native macOS menu
 * [ ] Multiple windows (if the app is activated while open)
-* [ ] Doesn't save image orientation after moving to another one
 * [ ] Extract image orientation from EXIF
 * [ ] Update README
+
+## Ideas
+* [ ] Native macOS menu — Open file/directory item?
