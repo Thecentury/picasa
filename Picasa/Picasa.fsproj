@@ -10,6 +10,17 @@
         <RootNamespace>Picasa</RootNamespace>
     </PropertyGroup>
 
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AOTMode>All</AOTMode>
+      <EnableCodeSigning>true</EnableCodeSigning>
+      <CodesignKey>Mac Developer</CodesignKey>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <EnableCodeSigning>true</EnableCodeSigning>
+      <CodesignKey>Mac Developer</CodesignKey>
+    </PropertyGroup>
+
     <ItemGroup>
         <Compile Include="Program.fs" />
     </ItemGroup>

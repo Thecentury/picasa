@@ -7,8 +7,119 @@
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
 	<key>CFBundleDisplayName</key>
-	<string>picasa</string>
+	<string>Picasa</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleIconFile</key>
+	<string>Assets.xcassets/AppIcon.appiconset</string>
+    <key>XSAppIconAssets</key>
+    <string>Assets.xcassets/AppIcon.appiconset</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.jpg</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeName</key>
+        <string>CFBundleTypeName</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.jpg</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.jpeg</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeName</key>
+        <string>CFBundleTypeName</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.jpeg</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.bmp</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.bmp</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.png</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.png</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.webm</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.webm</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
+    </array>
 </dict>
 </plist>
