@@ -29,18 +29,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.7" />
-    <PackageReference Include="Avalonia.FreeDesktop" Version="11.0.7" />
+    <PackageReference Include="Avalonia" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.9" />
+    <PackageReference Include="Avalonia.FreeDesktop" Version="11.0.9" />
     <PackageReference Include="Avalonia.FuncUI" Version="1.2.0" />
     <PackageReference Include="Avalonia.FuncUI.Elmish" Version="1.2.0" />
-    <PackageReference Include="Avalonia.Native" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Remote.Protocol" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Skia" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.7" />
-    <PackageReference Include="Avalonia.Win32" Version="11.0.7" />
-    <PackageReference Include="Avalonia.X11" Version="11.0.7" />
+    <PackageReference Include="Avalonia.Native" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Remote.Protocol" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Skia" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Win32" Version="11.0.9" />
+    <PackageReference Include="Avalonia.X11" Version="11.0.9" />
     <PackageReference Include="FSharp.Core.Fluent" Version="3.0.2" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
