@@ -21,7 +21,7 @@ open Serilog.Events
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
-type MainWindow(args : string[]) as this =
+type MainWindow (args : string[]) as this =
     inherit HostWindow()
     do
         let backgroundBrush = SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
@@ -132,6 +132,14 @@ type App() as this =
                             mainWindow.Show ()
                     )
                 | _ -> ()
+            match desktopLifetime.Args with
+            | [| |] ->
+                // No file name provided, closing.
+                ()
+            | args ->
+                let mainWindow = MainWindow args
+                desktopLifetime.MainWindow <- mainWindow
+
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
             match desktopLifetime.Args with
             | [| |] ->
@@ -152,7 +160,11 @@ module Program =
           .WriteTo.Console(
             outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
           )
-          .WriteTo.File(path="/Users/mic/picasa.log", outputTemplate="[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}")
+          // todo remove this logging.
+          // .WriteTo.File(
+          //     path = "/Users/mic/picasa.log",
+          //     outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+          //     restrictedToMinimumLevel = LogEventLevel.Debug)
           .CreateLogger()
 
         try
@@ -177,14 +189,17 @@ module Program =
                 AppBuilder
                     .Configure<App>()
                     .UsePlatformDetect()
-                    .StartWithClassicDesktopLifetime(args)
+                    .StartWithClassicDesktopLifetime(args, ShutdownMode.OnLastWindowClose)
 
             Log.Information "Done"
             Log.CloseAndFlush ()
 
             exitCode
-        with
-        | e ->
-            Log.Error(e, "Unhandled exception")
-            Log.CloseAndFlush ()
-            -1
+        with e ->
+            try
+                Log.Error(e, "Unhandled exception")
+                Log.CloseAndFlush ()
+                -1
+            with e ->
+                Console.WriteLine "Unhandled exception while handling an unhandled exception"
+                -2
