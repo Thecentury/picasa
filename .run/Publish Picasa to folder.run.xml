@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Publish Picasa to folder" type="DotNetFolderPublish" factoryName="Publish to folder">
-    <riderPublish configuration="Release" platform="Any CPU" ready_to_run="true" runtime="osx-x64" target_folder="$PROJECT_DIR$/Picasa/bin/Release/net8.0/osx-x64/publish" target_framework="net8.0" uuid_high="-770855624276687710" uuid_low="-6358517161102820111" />
+    <riderPublish configuration="Release" delete_existing_files="true" platform="Any CPU" ready_to_run="true" runtime="osx-x64" self_contained="true" target_folder="$PROJECT_DIR$/Picasa/bin/Release/net8.0-macos/osx-x64/publish" target_framework="net8.0-macos" trim_unused_assemblies="true" uuid_high="5585233953191905562" uuid_low="-6099689683656444441" />
     <method v="2" />
   </configuration>
 </component>
