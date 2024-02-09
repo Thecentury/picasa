@@ -1,0 +1,54 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <WarnOn>3390;$(WarnOn)</WarnOn>
+    <IsPackable>false</IsPackable>
+    <AvaloniaAccessUnstablePrivateApis>true</AvaloniaAccessUnstablePrivateApis>
+    <RootNamespace>Picasa</RootNamespace>
+    <NoWarn>AVA3001</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configutation)' == 'Release'">
+    <!--    <PublishSingleFile>true</PublishSingleFile>-->
+    <!--    <SelfContained>true</SelfContained>-->
+    <!--    <RuntimeIdentifier>osx-x64</RuntimeIdentifier>-->
+    <PublishReadyToRun>true</PublishReadyToRun>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Prelude.fs" />
+    <Compile Include="Files.fs" />
+    <Compile Include="Images.fs" />
+    <Compile Include="Caching.fs" />
+    <Compile Include="Model.fs" />
+    <Compile Include="UI.fs" />
+    <Compile Include="Services.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.9" />
+    <PackageReference Include="Avalonia.FreeDesktop" Version="11.0.9" />
+    <PackageReference Include="Avalonia.FuncUI" Version="1.2.0" />
+    <PackageReference Include="Avalonia.FuncUI.Elmish" Version="1.2.0" />
+    <PackageReference Include="Avalonia.Native" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Remote.Protocol" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Skia" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.9" />
+    <PackageReference Include="Avalonia.Win32" Version="11.0.9" />
+    <PackageReference Include="Avalonia.X11" Version="11.0.9" />
+    <PackageReference Include="FSharp.Core.Fluent" Version="3.0.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+    <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
+    <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0" />
+    <PackageReference Update="FSharp.Core" Version="8.0.101" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
+  </ItemGroup>
+
+</Project>

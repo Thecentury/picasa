@@ -43,7 +43,7 @@ module Model =
             OtherImages = HasNotStartedYet
             CurrentImagePath = path
             CurrentImage = HasNotStartedYet
-            CachedImages = Cache(notMoreThanDeletionPolicy 10)
+            CachedImages = Cache(notMoreThanDeletionPolicy 100)
             WindowSize = None
         }
 
@@ -171,7 +171,7 @@ let update (services : IServices) (msg : Msg) (model : Model) =
         match model.CurrentImage with
         | Resolved (Ok img) ->
             let rotated = rotateImage img dir
-            // todo mikbri update rotation in the cached image
+            model.CachedImages.Add model.CurrentImagePath rotated.Rotation (Ok rotated)
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
         | _ -> model, Cmd.none
     | RequestDeleteCurrentImage ->

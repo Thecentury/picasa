@@ -1,8 +1,11 @@
 [<AutoOpen>]
 module Picasa.Prelude
 
+open Avalonia
 open Avalonia.Media.Imaging
-open NLog
+open Serilog
+
+(*--------------------------------------------------------------------------------------------------------------------*)
 
 let (^) f x = f x
 
@@ -45,8 +48,7 @@ let runAsynchronously f arg = async {
         return Ok ^ f arg
     with
     | e ->
-        let logger = LogManager.GetCurrentClassLogger ()
-        logger.Error (e, $"Failed to execute runAsynchronously(%A{f}, %A{arg})")
+        Log.Error (e, $"Failed to execute runAsynchronously(%A{f}, %A{arg})")
         return Error e.Message
 }
 
@@ -90,7 +92,12 @@ module Rotation =
         | Right270 -> 270
 
 type RotatedImage = {
-    OriginalImage : IBitmap
-    RotatedImage : IBitmap
+    OriginalImage : Bitmap
+    RotatedImage : Bitmap
     Rotation : Rotation
 }
+
+(*--------------------------------------------------------------------------------------------------------------------*)
+
+type Size with
+    member this.IsDefault = this.Width = 0.0 && this.Height = 0.0

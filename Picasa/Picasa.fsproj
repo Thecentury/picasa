@@ -1,52 +1,41 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
-    <WarnOn>3390;$(WarnOn)</WarnOn>
-    <IsPackable>false</IsPackable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net8.0-macos</TargetFramework>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <GenerateDocumentationFile>false</GenerateDocumentationFile>
+        <ApplicationId>com.thecentury.picasa</ApplicationId>
+        <RootNamespace>Picasa</RootNamespace>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configutation)' == 'Release'">
-    <!--    <PublishSingleFile>true</PublishSingleFile>-->
-    <!--    <SelfContained>true</SelfContained>-->
-    <!--    <RuntimeIdentifier>osx-x64</RuntimeIdentifier>-->
-    <PublishReadyToRun>true</PublishReadyToRun>
-  </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <AOTMode>All</AOTMode>
+      <EnableCodeSigning>true</EnableCodeSigning>
+      <CodesignKey>Mac Developer</CodesignKey>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="Prelude.fs" />
-    <Compile Include="Files.fs" />
-    <Compile Include="Images.fs" />
-    <Compile Include="Caching.fs" />
-    <Compile Include="Model.fs" />
-    <Compile Include="UI.fs" />
-    <Compile Include="Services.fs" />
-    <Compile Include="Program.fs" />
-    <None Include="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <EnableCodeSigning>true</EnableCodeSigning>
+      <CodesignKey>Mac Developer</CodesignKey>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.19" />
-    <PackageReference Include="Avalonia.FreeDesktop" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Native" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Remote.Protocol" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Skia" Version="0.10.19" />
-    <PackageReference Include="Avalonia.Win32" Version="0.10.19" />
-    <PackageReference Include="Avalonia.X11" Version="0.10.19" />
-    <PackageReference Include="FSharp.Core.Fluent" Version="3.0.2" />
-    <PackageReference Include="JaggerJo.Avalonia.FuncUI" Version="0.5.3" />
-    <PackageReference Include="JaggerJo.Avalonia.FuncUI.DSL" Version="0.5.3" />
-    <PackageReference Include="JaggerJo.Avalonia.FuncUI.Elmish" Version="0.5.3" />
-    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
-    <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
-    <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0" />
-    <PackageReference Include="NLog" Version="4.7.11" />
-    <PackageReference Update="FSharp.Core" Version="8.0.101" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.0.9" />
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.9" />
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.7" />
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.9" />
+        <PackageReference Update="FSharp.Core" Version="8.0.101" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Picasa.Core\Picasa.Core.fsproj" />
+    </ItemGroup>
 
 </Project>

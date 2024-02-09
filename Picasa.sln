@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa", "Picasa\Picasa.fsproj", "{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.Core", "Picasa.Core\Picasa.Core.fsproj", "{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionItems", "SolutionItems", "{D6AA8F7B-A154-451A-A636-C2D934B4F1D5}"
 	ProjectSection(SolutionItems) = preProject
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa", "Picasa\Picasa.fsproj", "{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Picasa.exe", "Picasa.exe\Picasa.exe.fsproj", "{FB42065F-9ADB-4B66-98A9-2A916FE6C596}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,5 +21,13 @@ Global
 		{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F54D5EE4-D5E0-44A2-A7C2-0254B23DBCF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D82BCB0-4774-491A-AB59-8C8CDD8AF5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB42065F-9ADB-4B66-98A9-2A916FE6C596}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
