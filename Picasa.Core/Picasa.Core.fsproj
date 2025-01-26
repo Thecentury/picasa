@@ -51,4 +51,13 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FileFormat.Heic.Decoder">
+      <HintPath>..\ext\FileFormat.Heic.Decoder.dll</HintPath>
+    </Reference>
+    <Reference Include="FileFormat.IsoBmff">
+      <HintPath>..\ext\FileFormat.IsoBmff.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

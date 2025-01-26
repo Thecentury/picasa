@@ -1,12 +1,47 @@
 module Picasa.Images
 
+open System
+open System.IO
+open System.Runtime.InteropServices
 open Avalonia
 open Avalonia.Media.Imaging
+open FileFormat.Heic.Decoder
 
 open Prelude
 
+let private arrayAddress (arr : byte[]) =
+    let handle = GCHandle.Alloc(arr, GCHandleType.Pinned)
+    try
+        handle.AddrOfPinnedObject ()
+    finally
+        handle.Free ()
+
+let private loadHeic (Path path) =
+    use fs = new FileStream(path, FileMode.Open)
+    let heicImage = HeicImage.Load(fs)
+
+    let format =
+        if heicImage.DefaultFrame.HasAlpha then
+            PixelFormat.Bgra32
+        else
+            PixelFormat.Rgb24
+
+    let pixels = heicImage.GetByteArray(format)
+    let width = int heicImage.Width
+    let height = int heicImage.Height
+
+    let dpi = Vector(72, 72)
+    let pixelSize = PixelSize(width, height)
+    let bpm = new WriteableBitmap(pixelSize, dpi)
+    bpm.CopyPixels(PixelRect(pixelSize), arrayAddress pixels, 4 * width, 0)
+    bpm :> Bitmap
+
 let loadImage (Path path, orientation : Option<Rotation>) =
-    let bmp = new Bitmap (path)
+    let bmp =
+        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
+            loadHeic (Path path)
+        else
+            new Bitmap (path)
     {
         OriginalImage = bmp
         RotatedImage = bmp

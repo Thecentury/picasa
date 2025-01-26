@@ -10,6 +10,7 @@ let private filters = [
     "*.bmp"
     "*.png"
     "*.webp"
+    "*.heic"
 ]
 
 type SurroundingFiles = {
