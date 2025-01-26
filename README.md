@@ -2,17 +2,14 @@
 
 Built using [Avalonia](https://avaloniaui.net/) and [FuncUI](https://github.com/fsprojects/Avalonia.FuncUI).
 
-The application consists of two parts:
-- PicasaLauncher — a thin macOS .app-like wrapper built using [Mono](https://www.mono-project.com/) to be able to associate image file types with the application;
-- Picasa itself — a .net 8.0 Avalonia application.
-
 ![Application screenshot](./images/Picasa-Geese.jpg)
 
 ## Keyboard shortcuts
 
 - `Left`/`Right` — navigate between images;
 - `Ctrl+Left`/`Ctrl+Right` — navigate to the first/last image in the folder;
-- `[`/`]` — rotate image left/right.
+- `[`/`]` — rotate image left/right;
+- `Delete` — to delete the current image (to a macOS recycle bin).
 
 ## TODO
 
