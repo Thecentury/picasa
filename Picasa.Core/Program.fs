@@ -114,30 +114,44 @@ type App() as this =
         this.RequestedThemeVariant <- Styling.ThemeVariant.Light
 
     override this.OnFrameworkInitializationCompleted() =
+        Log.Information "OnFrameworkInitializationCompleted"
+
+        let activateWithUrl (lifetime : IClassicDesktopStyleApplicationLifetime) (url : Uri) =
+            let filePath = url.ToString().Replace("file://", "")
+
+            Dispatcher.UIThread.Post(fun () ->
+                match lifetime.MainWindow |> Option.ofObj with
+                | Some _ ->
+                    let mainWindow = MainWindow [| filePath |]
+                    mainWindow.Show ()
+                | None ->
+                    let mainWindow = MainWindow [| filePath |]
+                    lifetime.MainWindow <- mainWindow
+                    mainWindow.Show ()
+            )
+
         match this.ApplicationLifetime with
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
             match Application.Current.TryGetFeature(typeof<IActivatableLifetime>) |> Option.ofObj with
             | Some (:? IActivatableLifetime as activatableLifetime) ->
                 activatableLifetime.Activated.Add ^ function
                     | :? ProtocolActivatedEventArgs as args ->
-                        let filePath = args.Uri.ToString().Replace("file://", "")
-                        Log.Information($"Activated with {filePath}")
-
-                        Dispatcher.UIThread.Post(fun () ->
-                            match desktopLifetime.MainWindow |> Option.ofObj with
-                            | Some _ ->
-                                let mainWindow = MainWindow [| filePath |]
-                                mainWindow.Show ()
-                            | None ->
-                                let mainWindow = MainWindow [| filePath |]
-                                desktopLifetime.MainWindow <- mainWindow
-                                mainWindow.Show ()
-                        )
-                    | _ -> ()
-            | _ -> ()
+                        Log.Information("Activated with ProtocolActivatedEventArgs {Path}", args.Uri)
+                        activateWithUrl desktopLifetime args.Uri
+                    | :? FileActivatedEventArgs as args ->
+                        let path = args.Files[0].Path
+                        Log.Information("Activated with FileActivatedEventArgs {Path}", path)
+                        activateWithUrl desktopLifetime path
+                    | args ->
+                        Log.Information ("Activated with args {Args}, ignoring them", args)
+                        ()
+            | _ ->
+                Log.Warning "IActivatableLifetime not found, activation will not work as expected."
+                ()
 
             match desktopLifetime.Args with
             | [| |] ->
+                Log.Information "desktopLifetime.Args is empty, closing."
                 // No file name provided, closing.
                 ()
             | args ->
@@ -156,7 +170,7 @@ module Program =
             outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
           )
           // todo remove this logging.
-          // .WriteTo.File(
+          //.WriteTo.File(
           //     path = "/Users/mic/picasa.log",
           //     outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
           //     restrictedToMinimumLevel = LogEventLevel.Debug)
