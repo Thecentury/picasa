@@ -18,6 +18,7 @@ open Picasa
 
 open Model
 open Serilog.Events
+open SkiaSharp
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
@@ -115,32 +116,27 @@ type App() as this =
 
     override this.OnFrameworkInitializationCompleted() =
         match this.ApplicationLifetime with
-        | :? IActivatableApplicationLifetime as activatable & (:? IClassicDesktopStyleApplicationLifetime as desktopLifetime) ->
-            activatable.Activated.Add ^ function
-                | :? ProtocolActivatedEventArgs as args ->
-                    let filePath = args.Uri.ToString().Replace("file://", "")
-                    Log.Information($"Activated with {filePath}")
-
-                    Dispatcher.UIThread.Post(fun () ->
-                        match desktopLifetime.MainWindow |> Option.ofObj with
-                        | Some _ ->
-                            let mainWindow = MainWindow [| filePath |]
-                            mainWindow.Show ()
-                        | None ->
-                            let mainWindow = MainWindow [| filePath |]
-                            desktopLifetime.MainWindow <- mainWindow
-                            mainWindow.Show ()
-                    )
-                | _ -> ()
-            match desktopLifetime.Args with
-            | [| |] ->
-                // No file name provided, closing.
-                ()
-            | args ->
-                let mainWindow = MainWindow args
-                desktopLifetime.MainWindow <- mainWindow
-
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
+            match Application.Current.TryGetFeature(typeof<IActivatableLifetime>) |> Option.ofObj with
+            | Some (:? IActivatableLifetime as activatableLifetime) ->
+                activatableLifetime.Activated.Add ^ function
+                    | :? ProtocolActivatedEventArgs as args ->
+                        let filePath = args.Uri.ToString().Replace("file://", "")
+                        Log.Information($"Activated with {filePath}")
+
+                        Dispatcher.UIThread.Post(fun () ->
+                            match desktopLifetime.MainWindow |> Option.ofObj with
+                            | Some _ ->
+                                let mainWindow = MainWindow [| filePath |]
+                                mainWindow.Show ()
+                            | None ->
+                                let mainWindow = MainWindow [| filePath |]
+                                desktopLifetime.MainWindow <- mainWindow
+                                mainWindow.Show ()
+                        )
+                    | _ -> ()
+            | _ -> ()
+
             match desktopLifetime.Args with
             | [| |] ->
                 // No file name provided, closing.
@@ -184,6 +180,7 @@ module Program =
                 let options = AvaloniaNativePlatformOptions(RenderingMode = [| AvaloniaNativeRenderingMode.Software |])
                 AvaloniaLocator.CurrentMutable.BindToSelf options |> ignore
                 Log.Debug "Registering AvaloniaNativePlatformOptions"
+
 
             let exitCode =
                 AppBuilder

@@ -25,10 +25,10 @@ let private loadHeic (Path path) =
 
 let loadImage (Path path, orientation : Option<Rotation>) =
     let bmp =
-        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
-            loadHeic (Path path)
-        else
-            new Bitmap (path)
+//        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
+//            loadHeic (Path path)
+//        else
+        new Bitmap (path)
     {
         OriginalImage = bmp
         RotatedImage = bmp
