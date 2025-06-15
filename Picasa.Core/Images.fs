@@ -2,19 +2,11 @@ module Picasa.Images
 
 open System
 open System.IO
-open System.Runtime.InteropServices
 open Avalonia
 open Avalonia.Media.Imaging
 open FileFormat.Heic.Decoder
 
 open Prelude
-
-let private arrayAddress (arr : byte[]) =
-    let handle = GCHandle.Alloc(arr, GCHandleType.Pinned)
-    try
-        handle.AddrOfPinnedObject ()
-    finally
-        handle.Free ()
 
 let private loadHeic (Path path) =
     use fs = new FileStream(path, FileMode.Open)
@@ -27,14 +19,9 @@ let private loadHeic (Path path) =
             PixelFormat.Rgb24
 
     let pixels = heicImage.GetByteArray(format)
-    let width = int heicImage.Width
-    let height = int heicImage.Height
 
-    let dpi = Vector(72, 72)
-    let pixelSize = PixelSize(width, height)
-    let bpm = new WriteableBitmap(pixelSize, dpi)
-    bpm.CopyPixels(PixelRect(pixelSize), arrayAddress pixels, 4 * width, 0)
-    bpm :> Bitmap
+    use stream = new MemoryStream(pixels)
+    new Bitmap(stream)
 
 let loadImage (Path path, orientation : Option<Rotation>) =
     let bmp =
