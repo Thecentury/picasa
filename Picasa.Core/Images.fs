@@ -1,12 +1,27 @@
 module Picasa.Images
 
+open System
+open System.IO
 open Avalonia
 open Avalonia.Media.Imaging
+open ImageMagick
 
 open Prelude
 
+let private loadHeic (Path path) =
+    use magickImage = new MagickImage(path)
+    magickImage.Format <- MagickFormat.Jpg
+    use ms = new MemoryStream()
+    magickImage.Write(ms)
+    ms.Position <- 0
+    new Bitmap(ms)
+
 let loadImage (Path path, orientation : Option<Rotation>) =
-    let bmp = new Bitmap (path)
+    let bmp =
+        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
+            loadHeic (Path path)
+        else
+            new Bitmap (path)
     {
         OriginalImage = bmp
         RotatedImage = bmp

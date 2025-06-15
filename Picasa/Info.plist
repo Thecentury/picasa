@@ -120,6 +120,26 @@
         <key>NSDocumentClass</key>
         <string>NSDocumentClass</string>
       </dict>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>.heic</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>CFBundleTypeIconFile</string>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>LSItemContentTypes</key>
+        <array>
+          <string>public.heic</string>
+        </array>
+        <key>LSHandlerRank</key>
+        <string>Owner</string>
+        <key>LSTypeIsPackage</key>
+        <true />
+        <key>NSDocumentClass</key>
+        <string>NSDocumentClass</string>
+      </dict>
     </array>
 </dict>
 </plist>

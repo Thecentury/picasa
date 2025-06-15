@@ -13,11 +13,11 @@ open Avalonia.FuncUI.Elmish
 open Avalonia.FuncUI.Hosts
 open Avalonia.Controls.ApplicationLifetimes
 open Serilog
+open Serilog.Events
 
 open Picasa
 
 open Model
-open Serilog.Events
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
@@ -114,35 +114,44 @@ type App() as this =
         this.RequestedThemeVariant <- Styling.ThemeVariant.Light
 
     override this.OnFrameworkInitializationCompleted() =
+        Log.Information "OnFrameworkInitializationCompleted"
+
+        let activateWithUrl (lifetime : IClassicDesktopStyleApplicationLifetime) (url : Uri) =
+            let filePath = url.ToString().Replace("file://", "")
+
+            Dispatcher.UIThread.Post(fun () ->
+                match lifetime.MainWindow |> Option.ofObj with
+                | Some _ ->
+                    let mainWindow = MainWindow [| filePath |]
+                    mainWindow.Show ()
+                | None ->
+                    let mainWindow = MainWindow [| filePath |]
+                    lifetime.MainWindow <- mainWindow
+                    mainWindow.Show ()
+            )
+
         match this.ApplicationLifetime with
-        | :? IActivatableApplicationLifetime as activatable & (:? IClassicDesktopStyleApplicationLifetime as desktopLifetime) ->
-            activatable.Activated.Add ^ function
-                | :? ProtocolActivatedEventArgs as args ->
-                    let filePath = args.Uri.ToString().Replace("file://", "")
-                    Log.Information($"Activated with {filePath}")
-
-                    Dispatcher.UIThread.Post(fun () ->
-                        match desktopLifetime.MainWindow |> Option.ofObj with
-                        | Some _ ->
-                            let mainWindow = MainWindow [| filePath |]
-                            mainWindow.Show ()
-                        | None ->
-                            let mainWindow = MainWindow [| filePath |]
-                            desktopLifetime.MainWindow <- mainWindow
-                            mainWindow.Show ()
-                    )
-                | _ -> ()
-            match desktopLifetime.Args with
-            | [| |] ->
-                // No file name provided, closing.
-                ()
-            | args ->
-                let mainWindow = MainWindow args
-                desktopLifetime.MainWindow <- mainWindow
-
         | :? IClassicDesktopStyleApplicationLifetime as desktopLifetime ->
+            match Application.Current.TryGetFeature(typeof<IActivatableLifetime>) |> Option.ofObj with
+            | Some (:? IActivatableLifetime as activatableLifetime) ->
+                activatableLifetime.Activated.Add ^ function
+                    | :? ProtocolActivatedEventArgs as args ->
+                        Log.Information("Activated with ProtocolActivatedEventArgs {Path}", args.Uri)
+                        activateWithUrl desktopLifetime args.Uri
+                    | :? FileActivatedEventArgs as args ->
+                        let path = args.Files[0].Path
+                        Log.Information("Activated with FileActivatedEventArgs {Path}", path)
+                        activateWithUrl desktopLifetime path
+                    | args ->
+                        Log.Information ("Activated with args {Args}, ignoring them", args)
+                        ()
+            | _ ->
+                Log.Warning "IActivatableLifetime not found, activation will not work as expected."
+                ()
+
             match desktopLifetime.Args with
             | [| |] ->
+                Log.Information "desktopLifetime.Args is empty, closing."
                 // No file name provided, closing.
                 ()
             | args ->
@@ -161,7 +170,7 @@ module Program =
             outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
           )
           // todo remove this logging.
-          // .WriteTo.File(
+          //.WriteTo.File(
           //     path = "/Users/mic/picasa.log",
           //     outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
           //     restrictedToMinimumLevel = LogEventLevel.Debug)
@@ -185,6 +194,7 @@ module Program =
                 AvaloniaLocator.CurrentMutable.BindToSelf options |> ignore
                 Log.Debug "Registering AvaloniaNativePlatformOptions"
 
+
             let exitCode =
                 AppBuilder
                     .Configure<App>()
@@ -201,5 +211,7 @@ module Program =
                 Log.CloseAndFlush ()
                 -1
             with e ->
-                Console.WriteLine "Unhandled exception while handling an unhandled exception"
+                try
+                    Console.WriteLine "Unhandled exception while handling an unhandled exception"
+                with _ -> ()
                 -2
