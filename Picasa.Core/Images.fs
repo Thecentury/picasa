@@ -4,7 +4,7 @@ open System
 open System.IO
 open Avalonia
 open Avalonia.Media.Imaging
-open FileFormat.Heic.Decoder
+open Openize.Heic.Decoder
 
 open Prelude
 
