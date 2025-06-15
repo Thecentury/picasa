@@ -13,12 +13,11 @@ open Avalonia.FuncUI.Elmish
 open Avalonia.FuncUI.Hosts
 open Avalonia.Controls.ApplicationLifetimes
 open Serilog
+open Serilog.Events
 
 open Picasa
 
 open Model
-open Serilog.Events
-open SkiaSharp
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
@@ -198,5 +197,7 @@ module Program =
                 Log.CloseAndFlush ()
                 -1
             with e ->
-                Console.WriteLine "Unhandled exception while handling an unhandled exception"
+                try
+                    Console.WriteLine "Unhandled exception while handling an unhandled exception"
+                with _ -> ()
                 -2

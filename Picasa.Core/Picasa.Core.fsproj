@@ -43,6 +43,8 @@
     <PackageReference Include="Avalonia.X11" Version="11.3.1" />
     <PackageReference Include="FSharp.Core.Fluent" Version="3.0.2" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
+    <PackageReference Include="Magick.NET-Q8-AnyCPU" Version="14.6.0" />
+    <PackageReference Include="Magick.NET.AvaloniaMediaImaging" Version="1.1.1" />
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.4" />
     <PackageReference Include="Microsoft.NETCore.Targets" Version="5.0.0" />
     <PackageReference Update="FSharp.Core" Version="9.0.101" />

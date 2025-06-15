@@ -4,31 +4,24 @@ open System
 open System.IO
 open Avalonia
 open Avalonia.Media.Imaging
-open Openize.Heic.Decoder
+open ImageMagick
 
 open Prelude
 
 let private loadHeic (Path path) =
-    use fs = new FileStream(path, FileMode.Open)
-    let heicImage = HeicImage.Load(fs)
-
-    let format =
-        if heicImage.DefaultFrame.HasAlpha then
-            PixelFormat.Bgra32
-        else
-            PixelFormat.Rgb24
-
-    let pixels = heicImage.GetByteArray(format)
-
-    use stream = new MemoryStream(pixels)
-    new Bitmap(stream)
+    use magickImage = new MagickImage(path)
+    magickImage.Format <- MagickFormat.Jpg
+    use ms = new MemoryStream()
+    magickImage.Write(ms)
+    ms.Position <- 0
+    new Bitmap(ms)
 
 let loadImage (Path path, orientation : Option<Rotation>) =
     let bmp =
-//        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
-//            loadHeic (Path path)
-//        else
-        new Bitmap (path)
+        if String.Equals(Path.GetExtension(path), ".heic", StringComparison.InvariantCultureIgnoreCase) then
+            loadHeic (Path path)
+        else
+            new Bitmap (path)
     {
         OriginalImage = bmp
         RotatedImage = bmp
