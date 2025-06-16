@@ -18,10 +18,11 @@ open Serilog.Events
 open Picasa
 
 open Model
+open Services
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
-type MainWindow (args : string[]) as this =
+type MainWindow (args : string[], platform : Option<IPlatformServices>)  as this =
     inherit HostWindow()
     do
         let backgroundBrush = SolidColorBrush(Color.FromArgb(160uy, 0uy, 0uy, 0uy))
@@ -52,7 +53,7 @@ type MainWindow (args : string[]) as this =
                 failwith "Path was not provided"
 
         let model = Model.initialWithCommands (Path imagePath)
-        let services = Services.services ()
+        let services = Services.services platform
 
         let titleWasSet = ref false
 
@@ -82,7 +83,8 @@ type MainWindow (args : string[]) as this =
                     | Key.OemOpenBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Left
                     | Key.OemCloseBrackets, KeyModifiers.None -> dispatch ^ Msg.Rotate Right
                     | Key.Back, KeyModifiers.None
-                    | Key.Delete, KeyModifiers.None -> dispatch ^ Msg.RequestDeleteCurrentImage
+                    | Key.Delete, KeyModifiers.None -> dispatch Msg.RequestDeleteCurrentImage
+                    | Key.C, KeyModifiers.Meta -> dispatch Msg.RequestCopyCurrentImageToClipboard
                     | _ -> ()
                 let keyDownSubscription = this.KeyDown.Subscribe keyDownCallback
 
@@ -101,6 +103,13 @@ type MainWindow (args : string[]) as this =
 
             [["Keyboard"], sub])
         |> Program.runWithAvaloniaSyncDispatch ()
+
+type DataHolder =
+    static let mutable _platformServices : Option<IPlatformServices> = None
+
+    static member PlatformServices
+        with get () = _platformServices
+        and set value = _platformServices <- value
 
 type App() as this =
     inherit Application()
@@ -122,10 +131,10 @@ type App() as this =
             Dispatcher.UIThread.Post(fun () ->
                 match lifetime.MainWindow |> Option.ofObj with
                 | Some _ ->
-                    let mainWindow = MainWindow [| filePath |]
+                    let mainWindow = MainWindow ([| filePath |], DataHolder.PlatformServices)
                     mainWindow.Show ()
                 | None ->
-                    let mainWindow = MainWindow [| filePath |]
+                    let mainWindow = MainWindow ([| filePath |], DataHolder.PlatformServices)
                     lifetime.MainWindow <- mainWindow
                     mainWindow.Show ()
             )
@@ -155,26 +164,34 @@ type App() as this =
                 // No file name provided, closing.
                 ()
             | args ->
-                let mainWindow = MainWindow args
+                let mainWindow = MainWindow (args, DataHolder.PlatformServices)
                 desktopLifetime.MainWindow <- mainWindow
         | _ -> ()
 
 module Program =
 
-    [<EntryPoint>]
-    let main(args: string[]) =
-        Log.Logger <- LoggerConfiguration()
-          .MinimumLevel.Verbose()
-          .Enrich.FromLogContext()
-          .WriteTo.Console(
-            outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
-          )
-          // todo remove this logging.
-          //.WriteTo.File(
-          //     path = "/Users/mic/picasa.log",
-          //     outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
-          //     restrictedToMinimumLevel = LogEventLevel.Debug)
-          .CreateLogger()
+    let mainCore (args : string[]) (platform : Option<IPlatformServices>) =
+        DataHolder.PlatformServices <- platform
+
+        let logToFile = true
+        let loggerConf =
+            LoggerConfiguration()
+              .MinimumLevel.Verbose()
+              .Enrich.FromLogContext()
+              .WriteTo.Console(
+                outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}"
+              )
+        let loggerConf =
+            if logToFile then
+                loggerConf
+                    .WriteTo.File(
+                        path = "/Users/mic/picasa.log",
+                        outputTemplate = "[{Timestamp:HH:mm:ss.fff} {Level:u3}] {Message:lj}{NewLine}{Exception}",
+                        restrictedToMinimumLevel = LogEventLevel.Debug)
+            else
+                loggerConf
+
+        Log.Logger <- loggerConf.CreateLogger ()
 
         try
             AppDomain.CurrentDomain.UnhandledException.Add (fun e -> Log.Error (e.ExceptionObject :?> Exception, "AppDomain.UnhandledException"))
@@ -215,3 +232,7 @@ module Program =
                     Console.WriteLine "Unhandled exception while handling an unhandled exception"
                 with _ -> ()
                 -2
+
+    [<EntryPoint>]
+    let main (args : string[]) =
+        mainCore args None

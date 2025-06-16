@@ -7,6 +7,8 @@ open Picasa.Model
 open Picasa.Prelude // For Path type
 open Serilog
 
+(*--------------------------------------------------------------------------------------------------------------------*)
+
 /// Function to escape single quotes within a string for AppleScript literal usage.
 /// In AppleScript, a single quote inside a double-quoted string literal is escaped as \'
 let private escapeForAppleScript (s: string) =
@@ -48,7 +50,16 @@ let private deleteImage (path : Path) = async {
         return Error $"{e.GetType().Name}: {e.Message}"
 }
 
-let services () =
+type IPlatformServices =
+    abstract member CopyToClipboard : Path -> Async<Result<unit, string>>
+
+let services (platform : Option<IPlatformServices>) =
 
     { new IServices with
-        member _.DeleteImage path = deleteImage path }
+        member _.DeleteImage path = deleteImage path
+        member _.CopyToClipboard path = async {
+            match platform with
+            | None -> return Error "Copying not implemented."
+            | Some platform -> return! platform.CopyToClipboard path
+        }
+    }

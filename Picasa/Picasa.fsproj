@@ -8,6 +8,7 @@
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
         <ApplicationId>com.thecentury.picasa</ApplicationId>
         <RootNamespace>Picasa</RootNamespace>
+        <UseAppKit>true</UseAppKit>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -22,7 +23,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Compile Include="Clipboard.fs" />
         <Compile Include="Program.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="AppKit"/>
+        <Reference Include="Foundation"/>
+        <Reference Include="CoreGraphics"/>
     </ItemGroup>
 
     <ItemGroup>

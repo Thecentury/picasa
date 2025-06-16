@@ -8,11 +8,13 @@ open Picasa
 open Caching
 open Files
 open Images
+open Serilog
 
 (*--------------------------------------------------------------------------------------------------------------------*)
 
 type IServices =
     abstract member DeleteImage : Path -> Async<Result<unit, string>>
+    abstract member CopyToClipboard : Path -> Async<Result<unit, string>>
 
 type Model = {
     OtherImages : DeferredResult<SurroundingFiles>
@@ -35,6 +37,8 @@ type Msg =
     | WindowSizeChanged of Size
     | RequestDeleteCurrentImage
     | ImageDeleted of Path * Result<unit, string>
+    | RequestCopyCurrentImageToClipboard
+    | ImageCopied of Path * Result<unit, string>
 
 module Model =
 
@@ -174,9 +178,19 @@ let update (services : IServices) (msg : Msg) (model : Model) =
             model.CachedImages.Add model.CurrentImagePath rotated.Rotation (Ok rotated)
             { model with CurrentImage = Resolved ^ Ok rotated }, Cmd.none
         | _ -> model, Cmd.none
+    | RequestCopyCurrentImageToClipboard ->
+        let processResult result = ImageCopied (model.CurrentImagePath, result)
+        let cmd = Cmd.OfAsync.perform services.CopyToClipboard model.CurrentImagePath processResult
+        model, cmd
+    | ImageCopied (_, Ok ()) ->
+        // todo let the user know that the image was copied to clipboard
+        model, Cmd.none
+    | ImageCopied (_, Error e) ->
+        // todo let the user know that the image could not be copied to clipboard
+        Log.Error $"Failed to copy image to clipboard: {e}"
+        model, Cmd.none
     | RequestDeleteCurrentImage ->
-        let processResult result =
-            ImageDeleted (model.CurrentImagePath, result)
+        let processResult result = ImageDeleted (model.CurrentImagePath, result)
         let cmd = Cmd.OfAsync.perform services.DeleteImage model.CurrentImagePath processResult
         model, cmd
     | ImageDeleted (removedImage, Ok ()) ->
